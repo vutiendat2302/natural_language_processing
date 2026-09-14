@@ -1,0 +1,152 @@
+# ==============================================================================
+# Gitignore for Natural Language Processing (NLP) / Data Science Course
+# ==============================================================================
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Virtual Environments ---
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+.conda/
+.env.local
+
+# --- Jupyter Notebooks & Interactive Python ---
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*-checkpoint.ipynb
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.nox/
+.tox/
+
+# --- NLP Datasets & Corpora ---
+# Ignore large dataset directories and raw data files
+data/
+datasets/
+corpus/
+corpora/
+!data/.gitkeep
+!datasets/.gitkeep
+
+# Ignore common data file formats if placed outside data folders
+# *.csv
+# *.tsv
+# *.parquet
+# *.feather
+# *.jsonl
+# *.arrow
+# theory/**/*.json
+# practice/**/*.json
+
+# NLTK / Spacy / Hugging Face download caches
+nltk_data/
+spacy_data/
+.cache/
+hf_cache/
+transformers_cache/
+gensim-data/
+
+# --- Pretrained Models, Weights & Checkpoints ---
+# Heavy deep learning and ML weights should NOT be committed to git
+models/
+checkpoints/
+saved_models/
+weights/
+!models/.gitkeep
+!checkpoints/.gitkeep
+
+# Model & weight extensions
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.onnx
+*.safetensors
+*.h5
+*.hdf5
+*.pkl
+*.joblib
+*.pickle
+*.model
+
+# Pretrained embeddings
+*.vec
+*.emb
+glove*
+word2vec*
+
+# --- Experiment Tracking & Logs ---
+runs/
+lightning_logs/
+wandb/
+mlruns/
+mlartifacts/
+*.log
+logs/
+events.out.tfevents.*
+
+# --- Environment Variables & Secrets ---
+.env
+.env.*
+!.env.example
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# --- IDEs & Editors ---
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm / JetBrains
+.idea/
+
+# Vim / Emacs
+*~
+*.swp
+*.swo
+.#*
+\#*#
+
+# --- OS Specific Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
