@@ -1,9 +1,4 @@
 # Part B — Calculation Exercises
-
-Họ và tên sinh viên: Sinh viên MAT3561  
-Môn học: Xử lý ngôn ngữ tự nhiên và ứng dụng (MAT3561)  
-Bài tập: LAB 01 — From Text Processing to Search  
-
 ---
 
 ## Exercise 1 — Count Vector
@@ -21,7 +16,7 @@ Kích thước từ vựng: $V = 5$.
 Yêu cầu: Tính count vector của $D_1, D_2, D_3$.
 
 ### 2. Phương pháp tính
-Count vector biểu diễn số lần xuất hiện của mỗi từ trong vocabulary trong văn bản:
+Count vector biểu diễn số lần xuất hiện của mỗi từ vocabulary trong văn bản:
 $$\mathbf{c}(D) = [c(t_0, D), c(t_1, D), \dots, c(t_{V-1}, D)]^\top$$
 Thứ tự index:
 - Index 0: `cat`
@@ -91,6 +86,7 @@ Với $D_1$: tổng số từ là $1 + 1 + 1 = 3$.
 - $tf(\text{likes}, D_1) = \frac{0}{3} = 0$
 
 ### 4. Kiểm tra
+- Vector TF của $$\mathbf{tf}(D_1) = [\frac{1}{3}, 0, \frac{1}{3}, \frac{1}{3}, 0]$$
 $$\sum_{t \in \text{Vocab}} tf(t, D_1) = \frac{1}{3} + 0 + \frac{1}{3} + \frac{1}{3} + 0 = \frac{3}{3} = 1.0 \quad (\text{Thỏa mãn})$$
 
 ---
@@ -105,9 +101,8 @@ Corpus có tổng số tài liệu $N = 3$, và tần số tài liệu ($df$):
 - $df(\text{fish}) = 3$ ($D_1, D_2, D_3$)
 - $df(\text{likes}) = 1$ ($D_3$)
 
-Sử dụng công thức chuẩn trong slide:
+Sử dụng công thức:
 $$idf(t) = \log\left(\frac{N}{df(t)}\right)$$
-(Áp dụng logarit tự nhiên $\ln$ - chuẩn thông dụng trong NLP).
 
 ### 2. Chi tiết tính toán
 - $idf(\text{cat}) = \ln\left(\frac{3}{2}\right) = \ln(1.5) \approx 0.4055$
@@ -116,13 +111,11 @@ $$idf(t) = \log\left(\frac{N}{df(t)}\right)$$
 - $idf(\text{fish}) = \ln\left(\frac{3}{3}\right) = \ln(1) = 0.0000$
 - $idf(\text{likes}) = \ln\left(\frac{3}{1}\right) = \ln(3) \approx 1.0986$
 
-*(Ghi chú: Nếu dùng $\log_{10}$: $idf(\text{cat}) = \log_{10}(1.5) \approx 0.1761$; $idf(\text{dog}) \approx 0.4771$; $idf(\text{fish}) = 0$; $idf(\text{likes}) \approx 0.4771$. Thứ tự tương đối giữa các từ là không đổi).*
-
 ### 3. Câu hỏi và trả lời
 **Câu hỏi:** *Term nào có IDF thấp nhất? Vì sao?*  
 **Trả lời:**  
 Term có IDF thấp nhất là **`fish`** ($idf = 0$).  
-**Lý do:** Từ `fish` xuất hiện trong tất cả các văn bản trong corpus ($df(\text{fish}) = 3 = N$). Khi một từ xuất hiện ở mọi văn bản, tỷ số $\frac{N}{df(t)} = \frac{3}{3} = 1$, do đó $idf(t) = \ln(1) = 0$. Về mặt ý nghĩa thông tin, từ này mang tính phổ quát giống như stopword, không giúp phân biệt hay xếp hạng độ đặc trưng giữa các tài liệu.
+**Lý do:** Từ `fish` xuất hiện trong tất cả các văn bản ($df(\text{fish}) = 3 = N$). Về mặt ý nghĩa thông tin, từ này mang tính phổ quát giống như stopword, không giúp phân biệt hay xếp hạng độ đặc trưng giữa các tài liệu.
 
 ---
 
@@ -135,7 +128,7 @@ Tính TF-IDF của $D_1 =$ `"cat eats fish"` cho cả 3 terms: `cat`, `eats`, `f
 $$tfidf(t, d) = tf(t, d) \times idf(t)$$
 
 ### 3. Chi tiết tính toán
-Dựa trên kết quả từ Exercise 2 và Exercise 3 (dùng log tự nhiên $\ln$):
+
 - **Term `cat`**:
   $$tfidf(\text{cat}, D_1) = \frac{1}{3} \times \ln(1.5) \approx 0.3333 \times 0.4055 \approx 0.1352$$
 - **Term `eats`**:
@@ -150,7 +143,7 @@ $$\mathbf{tfidf}(D_1) = [0.1352, 0, 0.1352, 0, 0]$$
 **Câu hỏi:** *Tại sao `fish` xuất hiện trong mọi document nhưng TF-IDF của nó bằng 0 theo công thức trên?*  
 **Trả lời:**  
 Theo công thức $tfidf(t, d) = tf(t, d) \times idf(t)$, nếu $idf(t) = 0$ thì tích số lập tức bằng 0 bất kể $tf(t, d)$ có lớn thế nào. Vì `fish` xuất hiện ở mọi document ($df = N \implies idf = \log(1) = 0$).  
-Ý nghĩa lý thuyết: TF-IDF đo lường mức độ quan trọng và **tính đặc trưng riêng biệt** của một từ đối với một văn bản so với toàn bộ kho ngữ liệu. Nếu một từ có mặt ở tất cả các tài liệu, việc một tài liệu chứa từ này hoàn toàn không cung cấp thông tin phân biệt nào giữa tài liệu này với tài liệu khác.
+Ý nghĩa: TF-IDF đo lường mức độ quan trọng và **tính đặc trưng riêng biệt** của một từ đối với một văn bản so với toàn bộ kho ngữ liệu. Nếu một từ có mặt ở tất cả các tài liệu, việc một tài liệu chứa từ này hoàn toàn không cung cấp thông tin phân biệt nào giữa tài liệu này với tài liệu khác.
 
 ---
 
@@ -179,11 +172,12 @@ $$\cos(x, y) = \frac{x^\top y}{\|x\|_2 \|y\|_2}$$
   $$\cos(x, y) = \frac{2}{\sqrt{3} \times \sqrt{2}} = \frac{2}{\sqrt{6}} = \frac{\sqrt{6}}{3} \approx 0.8165$$
 
 ### 3. Giải thích trực giác
+Cosine similarity không đếm trực tiếp số chiều giống nhau rồi chia cho tổng số chiều.
+
 Giá trị $\frac{2}{3} \approx 0.6667$ là độ đo tương đồng tập hợp (Jaccard similarity: $\frac{|X \cap Y|}{|X \cup Y|} = \frac{2}{3}$) hoặc tỷ lệ số chiều trùng nhau trên tổng độ dài vector theo chuẩn $L_1$.
 
 Tuy nhiên, **Cosine Similarity đo góc hình học $\theta$ giữa hai vector trong không gian vector đa chiều**:
 1. Chuẩn hóa chiều dài được thực hiện bằng chuẩn $L_2$ (căn bậc hai của tổng bình phương). Do hiệu ứng căn bậc hai, sự chênh lệch ở một chiều (chiều thứ 3 bị lệch 1 đơn vị) không làm góc bị kéo dãn tuyến tính theo tỷ lệ phần trăm $1/3$.
-2. Góc giữa $x$ và $y$ chỉ là $\theta = \arccos(0.8165) \approx 35.26^\circ$. Góc này khá nhỏ, phản ánh việc hai vector cùng hướng về phía góc phần tám thứ nhất với 2 trên 3 thành phần trùng khít nhau hoàn toàn. Vì vậy $\cos(\theta) \approx 0.8165 > 0.6667$.
 
 ---
 
@@ -205,11 +199,12 @@ Query:
 
 2. **Document nào có similarity thấp nhất?**  
    - **Trả lời:** $D_3$.  
-   - **Giải thích:** $D_3$ không chia sẻ bất kỳ từ nào với $Q$ (tập từ vựng của $D_3$ là `{natural, language, processing}`, giao với `{medical, image, classification}` là rỗng $\emptyset$). Do đó tích vô hướng bằng 0 $\implies$ Cosine similarity = $0.0$.
+   - **Giải thích:** $D_3$ không chia sẻ bất kỳ từ nào với $Q$, không có từ nào chung (tập từ vựng của $D_3$ là `{natural, language, processing}`, giao với `{medical, image, classification}` là rỗng $\emptyset$). Do đó tích vô hướng bằng 0 $\implies$ Cosine similarity = $0.0$.
 
-3. **Term nào có thể có giá trị IDF thấp?**  
+3. **Term nào có thể có giá trị IDF thấp?**
+
    - **Trả lời:** Hai từ `"medical"` và `"image"`.  
-   - **Giải thích:** Trong tập dữ liệu này, cả 2 từ `"medical"` và `"image"` đều xuất hiện ở cả $D_1$ và $D_2$ ($df = 2$). Trong khi đó, các từ khác (`classification`, `analysis`, `natural`, `language`, `processing`) chỉ xuất hiện đúng 1 lần ($df = 1$). Theo công thức $idf = \log(N / df)$, $df$ càng lớn thì IDF càng nhỏ, vì vậy `"medical"` và `"image"` có giá trị IDF thấp nhất trong corpus.
+   - **Giải thích:** Một term có IDF thấp khi nó xuất hiện ở nhiều document, vì nó mang ít thông tin để phân biệt document này với document khác. Trong tập dữ liệu này, cả 2 từ `"medical"` và `"image"` đều xuất hiện ở cả $D_1$ và $D_2$ ($df = 2$). Trong khi đó, các từ khác (`classification`, `analysis`, `natural`, `language`, `processing`) chỉ xuất hiện đúng 1 lần ($df = 1$). Theo công thức $idf = \log(N / df)$, $df$ càng lớn thì IDF càng nhỏ, vì vậy `"medical"` và `"image"` có giá trị IDF thấp nhất trong corpus.
 
 4. **Nếu bỏ IDF và chỉ sử dụng count vector thì ranking có thay đổi không?**  
    - **Trả lời:** Thứ tự ranking **không thay đổi**.  
