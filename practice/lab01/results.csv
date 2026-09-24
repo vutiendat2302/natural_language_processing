@@ -1,0 +1,25 @@
+Query,Pipeline,Relevant In Corpus,Hits@5,Precision@5,Recall@5,MRR
+medical image classification,Pipeline A (Minimal),89,0,0.0,0.0,0.0
+medical image classification,Pipeline B (Normalized),89,0,0.0,0.0,0.0
+medical image classification,Pipeline C (Extended),89,1,0.2,0.011235955056179775,0.2
+transformer language model,Pipeline A (Minimal),126,1,0.2,0.007936507936507936,1.0
+transformer language model,Pipeline B (Normalized),126,1,0.2,0.007936507936507936,1.0
+transformer language model,Pipeline C (Extended),126,1,0.2,0.007936507936507936,1.0
+deep learning healthcare,Pipeline A (Minimal),202,1,0.2,0.0049504950495049506,0.5
+deep learning healthcare,Pipeline B (Normalized),202,1,0.2,0.0049504950495049506,0.5
+deep learning healthcare,Pipeline C (Extended),202,1,0.2,0.0049504950495049506,0.3333333333333333
+natural language processing,Pipeline A (Minimal),192,1,0.2,0.005208333333333333,0.25
+natural language processing,Pipeline B (Normalized),192,0,0.0,0.0,0.0
+natural language processing,Pipeline C (Extended),192,1,0.2,0.005208333333333333,0.3333333333333333
+climate change renewable energy,Pipeline A (Minimal),594,5,1.0,0.008417508417508417,1.0
+climate change renewable energy,Pipeline B (Normalized),594,5,1.0,0.008417508417508417,1.0
+climate change renewable energy,Pipeline C (Extended),594,5,1.0,0.008417508417508417,1.0
+recipes cooking ingredients,Pipeline A (Minimal),171,3,0.6,0.017543859649122806,1.0
+recipes cooking ingredients,Pipeline B (Normalized),171,3,0.6,0.017543859649122806,1.0
+recipes cooking ingredients,Pipeline C (Extended),171,3,0.6,0.017543859649122806,0.5
+real estate property investment,Pipeline A (Minimal),1043,5,1.0,0.004793863854266539,1.0
+real estate property investment,Pipeline B (Normalized),1043,5,1.0,0.004793863854266539,1.0
+real estate property investment,Pipeline C (Extended),1043,5,1.0,0.004793863854266539,1.0
+credit card interest rate loan,Pipeline A (Minimal),2975,5,1.0,0.0016806722689075631,1.0
+credit card interest rate loan,Pipeline B (Normalized),2975,5,1.0,0.0016806722689075631,1.0
+credit card interest rate loan,Pipeline C (Extended),2975,5,1.0,0.0016806722689075631,1.0
