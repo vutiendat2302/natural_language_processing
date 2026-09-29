@@ -61,10 +61,11 @@ corpora/
 # *.tsv
 # *.parquet
 # *.feather
-# *.jsonl
+*.json
+*.jsonl
 # *.arrow
-# theory/**/*.json
-# practice/**/*.json
+theory/**/*.json
+practice/**/*.json
 
 # NLTK / Spacy / Hugging Face download caches
 nltk_data/

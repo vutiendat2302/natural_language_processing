@@ -1,0 +1,38 @@
+# PART 1: CORPUS STATISTICS
+Metric,Value
+Total Documents,10000
+Total Sentences,214026
+Total Word Tokens,3657680
+Vocabulary Size |V|,96111
+Unique Unigrams,96111
+Hapax Unigrams (count=1),43124
+Hapax Unigram Ratio (%),44.87%
+Unique Bigrams,1159102
+Hapax Bigrams (count=1),847576
+Hapax Bigram Ratio (%),73.12%
+Unique Trigrams,2361677
+Hapax Trigrams (count=1),2081496
+Hapax Trigram Ratio (%),88.14%
+
+# PART 2: PERPLEXITY EVALUATION ACROSS N-GRAM MODELS
+Model,Train PPL,Validation PPL,Test PPL,Fit Time (s)
+Unigram MLE,1430.19,inf,inf,0.32
+Unigram Laplace,1449.12,1575.07,1571.29,0.43
+Bigram MLE,55.74,inf,inf,0.5
+Bigram Laplace,4951.97,7484.29,7501.88,0.62
+Trigram MLE,4.44,inf,inf,0.56
+Trigram Laplace,10733.27,19899.09,19719.13,0.69
+
+# PART 3: NEXT-WORD PREDICTION BENCHMARK
+Context,Predictions (Top 3 with P),Actual In-Corpus Continuations
+in the,"most (0.0041), first (0.0039), best (0.0034)","world (339), past (224)"
+you can,"be (0.0085), t (0.0025), also (0.0017)","also (225), t (182)"
+the cat,"house (0.0002), </s> (0.0001), to (0.0001)","queen (5), s (2)"
+machine learning,"</s> (0.0002), in (0.0002), about (0.0002)","and (7), based (5)"
+natural language,"and (0.0003), </s> (0.0002), that (0.0001)","processing (2), toolkit (1)"
+
+# PART 4: SENTENCE RANKING CANDIDATE CONTINUATIONS
+Rank,Context,Candidate Continuation,Conditional Log Probability
+1,machine learning,banana computer quickly,-30.95
+2,machine learning,studies language models,-30.95
+3,machine learning,is useful for nlp,-39.03

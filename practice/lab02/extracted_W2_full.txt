@@ -1,0 +1,1060 @@
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+LAB 02 — Language Models
+Môn học: Xử lý ngôn ngữ tự nhiên và ứng dụng
+Giảng viên / TA: Phạm Ngọc Hải
+
+•
+
+| Học kỳ: Học kỳ I - 2026
+
+Hạn nộp: 23:59 - 30/09/2026
+
+Chủ đề: N-gram Language Models, Smoothing and Perplexity
+
+1. Bối cảnh
+Ở LAB 01, văn bản được biểu diễn thành vector TF-IDF để phục vụ tìm kiếm.
+Tuy nhiên, TF-IDF không mô hình hóa trực tiếp xác suất của một chuỗi từ.
+Ví dụ, xét hai câu:
+the cat eats fish
+the fish eats cat
+
+TF-IDF có thể biểu diễn cả hai câu bằng các thành phần từ tương tự nhau, nhưng không trực tiếp
+trả lời:
+■ Câu nào có khả năng xuất hiện tự nhiên hơn?
+■ Sau the cat từ nào có khả năng xuất hiện tiếp theo?
+■ Xác suất của cả câu là bao nhiêu?
+■ Một câu mới có “giống ngôn ngữ” của corpus hay không?
+
+Language Model giải quyết nhóm vấn đề này bằng cách mô hình hóa:
+
+𝑃 (𝑤1 , 𝑤2 , … , 𝑤𝑇 ).
+Trong lab này, sinh viên xây dựng một n-gram language model từ đầu, sau đó sử dụng nó để dự
+đoán và đánh giá văn bản.
+
+2. Mục tiêu học tập
+Sau khi hoàn thành lab, sinh viên có thể:
+■ LO1: Giải thích language model dưới góc nhìn xác suất.
+■ LO2: Tính xác suất của chuỗi từ bằng chain rule.
+■ LO3: Giải thích giả định Markov của n-gram language model.
+■ LO4: Tự cài đặt unigram, bigram và trigram language model.
+■ LO5: Giải thích vấn đề zero probability.
+■ LO6: Cài đặt và so sánh các phương pháp smoothing cơ bản.
+■ LO7: Tính và diễn giải perplexity.
+■ LO8: Sử dụng language model để dự đoán từ tiếp theo hoặc xếp hạng câu.
+■ LO9: Phân tích ảnh hưởng của corpus, vocabulary và smoothing đến mô hình.
+■ LO10: Nhận diện giới hạn của n-gram language models và liên hệ tới neural language models.
+
+3. Kiến thức tiên quyết
+Sinh viên cần hoàn thành LAB 01 và nắm:
+■ tokenization;
+■ vocabulary;
+■ frequency/count;
+■ xác suất cơ bản;
+■ vector và normalization ở mức cơ bản;
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 1
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+■ Python và NumPy;
+■ train/test split.
+
+Không yêu cầu sinh viên đã học Transformer.
+
+4. Cấu trúc lab
+Giai đoạn
+
+Thời lượng
+
+Hoạt động
+
+Theory recap
+
+20 phút
+
+Language modeling và xác suất
+
+Calculation
+
+30 phút
+
+Chain rule, n-gram, smoothing
+
+Prediction
+
+10 phút
+
+Dự đoán trước khi chạy
+
+Experiment 1
+
+20 phút
+
+Corpus và n-gram statistics
+
+Core implementation
+
+40 phút
+
+Unigram/Bigram/Trigram
+
+Experiment 2
+
+30 phút
+
+Zero probability và smoothing
+
+Evaluation
+
+25 phút
+
+Perplexity
+
+Application
+
+25 phút
+
+Next-word prediction / sentence ranking
+
+Error analysis
+
+20 phút
+
+Phân tích lỗi
+
+Reflection
+
+10 phút
+
+Từ n-gram đến neural LM
+
+5. Theory recap
+5.1 Language Model là gì?
+Language model gán xác suất cho một chuỗi từ:
+
+𝑃 (𝑤1 , 𝑤2 , … , 𝑤𝑇 ).
+Ví dụ:
+
+𝑃 (the cat eats fish).
+Một language model tốt thường gán xác suất cao hơn cho những chuỗi có tính tự nhiên cao hơn
+trong ngôn ngữ/corpus đang xét.
+
+5.2 Chain Rule
+Theo chain rule:
+𝑇
+
+𝑃 (𝑤1 , … , 𝑤𝑇 ) = ∏ 𝑃 (𝑤𝑡 |𝑤1 , … , 𝑤𝑡−1 ).
+𝑡=1
+
+Ví dụ:
+
+𝑃 (the cat eats)
+được phân rã thành:
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 2
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+𝑃 (the)𝑃 (cat|the)𝑃 (eats|the cat).
+Đây là nền tảng của language modeling.
+
+5.3 Vấn đề của chain rule
+Nếu sử dụng toàn bộ lịch sử:
+
+𝑃 (𝑤𝑡 |𝑤1 , … , 𝑤𝑡−1 ),
+số lượng context có thể tăng cực nhanh.
+Do đó n-gram language model sử dụng một giả định đơn giản hóa.
+
+6. N-gram Language Model
+6.1 Unigram
+Unigram chỉ xét chính từ hiện tại:
+
+𝑃 (𝑤𝑡 ).
+Ước lượng:
+
+𝑃 (𝑤) =
+
+𝐶(𝑤)
+.
+𝑁
+
+Trong đó:
+■ (C(w)): số lần từ (w) xuất hiện;
+■ (N): tổng số token.
+
+6.2 Bigram
+Bigram xét một từ trước đó:
+
+𝑃 (𝑤𝑡 |𝑤𝑡−1 ).
+Ước lượng bằng maximum likelihood:
+
+𝑃 (𝑤𝑡 |𝑤𝑡−1 ) =
+
+𝐶(𝑤𝑡−1 , 𝑤𝑡 )
+.
+𝐶(𝑤𝑡−1 )
+
+Ví dụ:
+the cat
+the dog
+the fish
+
+Nếu:
+
+𝐶(the cat) = 20
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 3
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+và
+
+𝐶(the) = 100,
+thì:
+
+𝑃 (cat|the) = 0.2.
+6.3 Trigram
+Trigram sử dụng hai từ trước:
+
+𝑃 (𝑤𝑡 |𝑤𝑡−2 , 𝑤𝑡−1 ).
+Ước lượng:
+
+𝑃 (𝑤𝑡 |𝑤𝑡−2 , 𝑤𝑡−1 ) =
+
+𝐶(𝑤𝑡−2 , 𝑤𝑡−1 , 𝑤𝑡 )
+.
+𝐶(𝑤𝑡−2 , 𝑤𝑡−1 )
+
+7. Bài tập tính toán
+Phần này phải được làm trước khi sử dụng code.
+
+Bài 1 — Unigram
+Cho corpus:
+the cat eats fish
+the cat likes fish
+the dog eats meat
+
+Hãy:
+1. Xác định vocabulary.
+2. Tính tổng số token.
+3. Tính (P(w)) cho:
+the
+cat
+fish
+dog
+
+4. Kiểm tra:
+
+∑ 𝑃 (𝑤) = 1.
+𝑤
+
+Bài 2 — Bigram
+Với corpus trên, tính:
+
+𝑃 (cat|the)
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 4
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+𝑃 (dog|the)
+𝑃 (eats|cat)
+𝑃 (likes|cat)
+Sau đó trả lời:
+Tại sao tổng xác suất của các từ đứng sau the phải bằng 1 nếu vocabulary và context
+được xử lý đầy đủ?
+
+Bài 3 — Xác suất câu
+Cho:
+the cat eats fish
+
+Giả sử sử dụng bigram:
+
+𝑃 (the)𝑃 (cat|the)𝑃 (eats|cat)𝑃 (fish|eats).
+Tính xác suất của câu.
+Sau đó trả lời:
+Nếu thêm một từ vào câu, xác suất của cả câu có thể tăng không?
+Đây là câu hỏi quan trọng để sinh viên nhận ra rằng xác suất của một sequence không phải là
+thước đo trực tiếp để so sánh các câu có độ dài khác nhau.
+
+Bài 4 — Sentence ranking
+Cho hai câu:
+S1 = the cat eats fish
+S2 = the dog eats fish
+
+Dựa trên corpus đã cho, hãy dự đoán câu nào có xác suất cao hơn.
+Không chạy code trước khi đưa ra dự đoán.
+
+8. Zero Probability
+Xét:
+the cat eats fish
+
+Nếu corpus không chứa:
+cat eats
+
+thì:
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 5
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+𝐶(cat eats) = 0.
+Do đó:
+
+𝑃 (eats|cat) = 0.
+Khi tính xác suất cả câu:
+
+𝑃 (𝑆) = ∏ 𝑃 (𝑤𝑡 |𝑤𝑡−1 ),
+𝑡
+
+chỉ cần một thành phần bằng 0 thì:
+
+𝑃 (𝑆) = 0.
+Đây là zero-frequency problem.
+
+9. Bài tập suy luận trước khi smoothing
+Cho corpus:
+I like NLP
+I like AI
+I study NLP
+
+Giả sử cần tính:
+
+𝑃 (AI|study).
+Sinh viên phải trả lời:
+1. Count của study AI là bao nhiêu?
+2. Xác suất MLE là bao nhiêu?
+3. Điều gì xảy ra khi tính xác suất câu chứa bigram này?
+4. Điều này có nghĩa mô hình “biết” rằng câu đó chắc chắn không thể xảy ra không?
+Mục tiêu là phân biệt:
+Không quan sát thấy ≠ xác suất thực sự bằng 0.
+
+10. Smoothing
+10.1 Add-one / Laplace smoothing
+Một cách đơn giản:
+
+𝑃Laplace (𝑤|ℎ) =
+
+𝐶(ℎ, 𝑤) + 1
+.
+𝐶(ℎ) + 𝑉
+
+Trong đó:
+■ (h): context;
+■ (V): vocabulary size.
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 6
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+Ví dụ:
+
+𝑃 (𝑤|ℎ) =
+
+𝐶(ℎ, 𝑤) + 1
+.
+𝐶(ℎ) + 𝑉
+
+Sinh viên cần chú ý rằng smoothing làm thay đổi toàn bộ phân phối xác suất, không chỉ biến
+những zero thành số dương.
+
+11. Bài tập tính smoothing
+Cho:
+
+𝐶(cat) = 10
+𝐶(cat eats) = 0
+và:
+
+𝑉 = 5.
+Tính:
+
+𝑃Laplace (eats|cat).
+Sau đó tính lại khi:
+
+𝐶(cat eats) = 3.
+Trả lời:
+Smoothing đã thay đổi xác suất của những bigram khác như thế nào?
+
+12. Prediction trước experiment
+Trước khi code, sinh viên phải ghi dự đoán.
+Prediction 1
+Khi chuyển:
+unigram → bigram → trigram
+
+vocabulary có tăng không?
+Prediction 2
+Số lượng n-gram sẽ thay đổi như thế nào?
+Prediction 3
+Mô hình nào có khả năng gặp zero probability nhiều hơn?
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 7
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+Prediction 4
+Mô hình nào dự kiến có perplexity thấp hơn trên training set?
+Prediction 5
+Nếu corpus rất nhỏ, trigram có chắc chắn tốt hơn bigram không?
+Sinh viên phải ghi:
+Prediction:
+Reason:
+Confidence:
+
+Sau experiment mới được sửa prediction.
+
+13. Experiment 1 — Corpus statistics
+Sử dụng corpus đã chuẩn bị cho môn học.
+Sử dụng corpus nhỏ trước:
+10K–30K documents
+
+Sinh viên thống kê:
+■ số documents;
+■ số sentences;
+■ số tokens;
+■ vocabulary size;
+■ số unigram;
+■ số bigram;
+■ số trigram;
+■ số n-gram chỉ xuất hiện một lần.
+
+Ví dụ:
+Model
+
+# unique n-grams
+
+Unigram
+
+…
+
+Bigram
+
+…
+
+Trigram
+
+…
+
+Sau đó vẽ:
+Frequency distribution của unigram/bigram/trigram.
+
+14. Core implementation
+Đây là phần quan trọng nhất của lab.
+Sinh viên không được dùng trực tiếp một thư viện language model để thay thế implementation.
+Cần tự xây dựng:
+build_vocabulary()
+count_ngrams()
+train_unigram()
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 8
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+train_bigram()
+train_trigram()
+probability()
+sentence_probability()
+
+Có thể thiết kế class:
+class NGramLanguageModel:
+def __init__(self, n):
+...
+def fit(self, corpus):
+...
+def probability(self, context, word):
+...
+def sentence_probability(self, sentence):
+...
+def next_word_distribution(self, context):
+...
+
+15. Log probability
+Không nên tính:
+
+𝑃 (𝑆) = ∏ 𝑃 (𝑤𝑡 |𝑐𝑜𝑛𝑡𝑒𝑥𝑡)
+𝑡
+
+trực tiếp với những câu dài.
+Thay vào đó:
+log 𝑃 (𝑆) = ∑ log 𝑃 (𝑤𝑡 |𝑐𝑜𝑛𝑡𝑒𝑥𝑡).
+𝑡
+
+Sinh viên cần implement:
+sentence_log_probability()
+
+và giải thích:
+Tại sao log probability giúp tránh vấn đề numerical underflow?
+
+16. Experiment 2 — MLE vs smoothing
+So sánh:
+1. MLE;
+2. Laplace smoothing.
+Đánh giá trên:
+■ training set;
+■ validation set;
+■ test set.
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 9
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+Ví dụ:
+Model
+
+Train PPL
+
+Valid PPL
+
+Test PPL
+
+Bigram MLE
+
+…
+
+…
+
+…
+
+Bigram Laplace
+
+…
+
+…
+
+…
+
+Trigram MLE
+
+…
+
+…
+
+…
+
+Trigram Laplace
+
+…
+
+…
+
+…
+
+Không yêu cầu sinh viên chỉ ra “model nào thắng”.
+Thay vào đó phải trả lời:
+Tại sao kết quả lại như vậy?
+
+17. Perplexity
+Perplexity là metric quan trọng của language model.
+Với sequence gồm (N) token:
+1
+
+𝑃 𝑃 (𝑊 ) = 𝑃 (𝑤1 , … , 𝑤𝑁 )− 𝑁 .
+Tương đương:
+
+𝑃 𝑃 (𝑊 ) = exp (−
+
+1 𝑁
+∑ log 𝑃 (𝑤𝑖 |𝑐𝑜𝑛𝑡𝑒𝑥𝑡𝑖 )) .
+𝑁 𝑖=1
+
+Ý tưởng trực quan:
+Perplexity đo mức độ “bối rối” của model khi quan sát sequence.
+Perplexity thấp hơn thường có nghĩa model gán xác suất cao hơn cho dữ liệu đánh giá.
+Nhưng sinh viên phải lưu ý:
+Perplexity chỉ có ý nghĩa khi các model được đánh giá trên cùng dữ liệu, cùng
+preprocessing và cùng cách tính.
+
+18. Bài tập tính Perplexity
+Cho:
+
+𝑃 (𝑤1 ) = 0.5
+𝑃 (𝑤2 |𝑤1 ) = 0.25
+𝑃 (𝑤3 |𝑤2 ) = 0.5.
+Tính:
+
+𝑃 (𝑊 )
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 10
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+và:
+
+𝑃 𝑃 (𝑊 ).
+Sau đó tính lại nếu:
+
+𝑃 (𝑤2 |𝑤1 ) = 0.1.
+Trả lời:
+Vì sao chỉ một xác suất nhỏ cũng có thể làm perplexity thay đổi đáng kể?
+
+19. Experiment 3 — Perplexity
+So sánh:
+Unigram
+Bigram
+Trigram
+
+trên:
+train
+validation
+test
+
+Kết quả:
+Model
+
+Train
+
+Validation
+
+Test
+
+Unigram
+Bigram
+Trigram
+
+Sinh viên phải giải thích:
+■ tại sao training perplexity thay đổi;
+■ tại sao validation/test có thể không cải thiện;
+■ dấu hiệu overfitting;
+■ tác động của corpus size.
+
+20. Application — Next-word prediction
+Xây dựng một hệ thống dự đoán từ tiếp theo.
+Input:
+the cat
+
+Output:
+1. eats
+2. likes
+3. sees
+
+0.42
+0.31
+0.08
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 11
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+4. ...
+
+Sinh viên phải thử ít nhất:
+5 contexts
+
+và ghi lại:
+Context
+
+Prediction
+
+Actual next word
+
+the cat
+
+…
+
+…
+
+natural language
+
+…
+
+…
+
+machine learning
+
+…
+
+…
+
+21. Application — Sentence ranking
+Cho một context và nhiều candidate continuations.
+Ví dụ:
+Context:
+machine learning
+A. is useful for NLP
+B. banana computer quickly
+C. studies language models
+
+Language model tính:
+
+𝑃 (𝐴|𝑐𝑜𝑛𝑡𝑒𝑥𝑡)
+𝑃 (𝐵|𝑐𝑜𝑛𝑡𝑒𝑥𝑡)
+𝑃 (𝐶|𝑐𝑜𝑛𝑡𝑒𝑥𝑡).
+Xếp hạng các candidate.
+Đây là một application đơn giản nhưng giúp sinh viên thấy:
+Language model không chỉ “sinh text”; nó cũng có thể được dùng để score và rank text.
+
+22. Error analysis
+Sinh viên chọn:
+■ 2 prediction đúng;
+■ 2 prediction sai.
+
+Với mỗi trường hợp:
+Context:
+Model prediction:
+Expected:
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 12
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+Probability:
+
+Sau đó xác định nguyên nhân:
+■ insufficient training data;
+■ unseen n-gram;
+■ vocabulary limitation;
+■ sparsity;
+■ context quá ngắn;
+■ domain mismatch;
+■ preprocessing;
+■ smoothing.
+
+23. Một thí nghiệm rất quan trọng: context length
+Cho cùng một corpus:
+Unigram
+Bigram
+Trigram
+
+Hỏi:
+Context dài hơn có luôn tốt hơn không?
+Sinh viên phải dựa trên:
+■ training perplexity;
+■ validation perplexity;
+■ test perplexity;
+■ số lượng n-gram;
+■ số lượng unseen n-gram.
+
+Đây là điểm chuyển rất tự nhiên sang:
+n-gram
+↓
+neural language model
+↓
+word embeddings
+↓
+RNN
+↓
+attention
+↓
+Transformer
+
+24. Reflection
+Sinh viên trả lời ngắn:
+Câu 1
+Nếu tăng (n), mô hình nhận thêm thông tin gì?
+Câu 2
+Tại sao tăng (n) lại làm sparsity tăng?
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 13
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+Câu 3
+Tại sao smoothing cần thiết?
+Câu 4
+Perplexity đo điều gì?
+Câu 5
+Một model có perplexity thấp hơn có luôn tạo ra văn bản tốt hơn đối với con người không? Giải
+thích.
+Câu 6
+N-gram language model thất bại ở đâu khi so với cách con người hiểu ngôn ngữ?
+Câu 7
+Nếu context dài 100 từ, trigram có sử dụng được thông tin của 97 từ đầu không?
+Câu cuối là cầu nối trực tiếp sang neural language models.
+
+25. AI policy
+AI được phép sử dụng cho:
+■ tìm documentation;
+■ debugging;
+■ giải thích lỗi Python;
+■ kiểm tra API;
+■ visualization;
+■ tối ưu code sau khi implementation cơ bản đã hoàn thành.
+
+Không được sử dụng AI trong:
+■ bài tính toán ban đầu;
+■ prediction trước experiment;
+■ giải thích kết quả;
+■ error analysis;
+■ reflection;
+■ individual learning check.
+
+Nếu sử dụng AI cho code:
+AI assistance statement
+Tool:
+Purpose:
+What was generated:
+What was modified:
+How the result was verified:
+
+26. Individual learning check
+Mỗi sinh viên có khoảng 3 phút.
+Giảng viên hoặc TA chọn ngẫu nhiên 1 câu:
+Vì sao bigram có zero probability?
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 14
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+hoặc:
+Tại sao phải dùng log probability?
+hoặc:
+Perplexity thấp nghĩa là gì?
+hoặc:
+Tại sao trigram không nhất thiết tốt hơn bigram trên test set?
+hoặc:
+Nếu cat eats chưa xuất hiện trong training corpus thì model xử lý thế nào?
+Chấm:
+Mức
+
+Điểm
+
+Không giải thích được
+
+0
+
+Hiểu một phần
+
+1
+
+Giải thích chính xác
+
+2
+
+27. Deliverables
+lab02/
+├── README.md
+├── calculations.md
+├── prediction.md
+├── ngram_lm.py
+├── experiments.ipynb
+├── results.csv
+├── error_analysis.md
+└── reflection.md
+
+Trong đó:
+File
+
+Nội dung
+
+calculations.md
+
+Tính toán bằng tay
+
+prediction.md
+
+Dự đoán trước experiment
+
+ngram_lm.py
+
+Implementation
+
+experiments.ipynb
+
+Experiments
+
+results.csv
+
+Perplexity + prediction results
+
+error_analysis.md
+
+Phân tích lỗi
+
+reflection.md
+
+Câu hỏi tổng kết
+
+28. Rubric
+Thành phần
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Điểm
+
+Theory & calculation
+
+10
+
+Prediction
+
+10
+
+Trang 15
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+Thành phần
+
+Điểm
+
+Core implementation
+
+20
+
+Smoothing experiment
+
+15
+
+Perplexity evaluation
+
+15
+
+Application
+
+10
+
+Error analysis
+
+10
+
+Reflection
+
+5
+
+Individual learning check
+
+5
+
+Tổng
+
+100
+
+29. Peer assessment dễ chấm
+Checklist:
+Calculation
+[ ] Unigram probability đúng
+[ ] Bigram probability đúng
+[ ] Sentence probability đúng
+[ ] Perplexity đúng
+Implementation
+[ ] count n-gram đúng
+[ ] conditional probability đúng
+[ ] log probability đúng
+[ ] smoothing đúng
+Experiment
+[ ] Có train/validation/test
+[ ] Có so sánh unigram/bigram/trigram
+[ ] Có gia
+̉i thích kế
+t qua
+̉
+Analysis
+[ ] Có 2 prediction đúng
+[ ] Có 2 prediction sai
+[ ] Có gia
+̉i thích nguyên nhân
+
+30. Mối liên hệ với LAB 01
+LAB 01
+Text
+↓
+Tokenization
+↓
+Count
+↓
+TF-IDF
+↓
+Document representation
+↓
+Search
+
+sang:
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 16
+
+Xử lý ngôn ngữ tự nhiên và ứng dụng
+
+Học kỳ I - 2026
+
+LAB 02
+Text
+↓
+Tokenization
+↓
+Count
+↓
+Conditional probability
+↓
+N-gram Language Model
+↓
+Sentence probability
+↓
+Perplexity
+↓
+Next-word prediction
+
+Điểm rất hay là cùng một khái niệm count/frequency nhưng được dùng theo hai hướng
+khác nhau:
+LAB 01: Count → representation
+
+LAB 02: Count → probability
+Từ đây LAB 03 sẽ chuyển sang Word Representations / Word Embeddings, và các em sẽ thấy
+một bước tiến quan trọng:
+
+Sparse count-based representation → Dense distributed representation → Contextual representation
+Đó sẽ là cầu nối rất tự nhiên từ NLP cổ điển sang neural NLP và sau này là Transformer/LLM.
+
+ĐH Khoa học Tự nhiên - ĐHQGHN
+
+Trang 17
+
+
