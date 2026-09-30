@@ -17,25 +17,23 @@ practice/lab02/
 ├── README.md                      # [File hiện tại] Hướng dẫn chi tiết, tổng quan báo cáo và đối chiếu rubric
 ├── calculations.md                # [Mục 7, 9, 11, 18] Lời giải chi tiết bài tập tính tay và chứng minh toán học
 ├── prediction.md                  # [Mục 12] 5 Dự đoán khoa học trước thực nghiệm kèm cơ sở lý thuyết
-├── ngram_lm.py                    # [Mục 14, 15] Mã nguồn Python cốt lõi cài đặt N-gram LM từ đầu
-├── experiments.ipynb              # [Mục 13, 16, 19, 20, 21, 23] Notebook Jupyter chạy thực nghiệm toàn diện
-├── 23000111_VuTienDat_BT2.ipynb   # [Bản nộp chuẩn] Notebook đặt tên theo đúng quy chế mã sinh viên
-├── results.csv                    # [Mục 27] Bảng số liệu định lượng: thống kê corpus, perplexity, predictions, rankings
+├── ngram_lm.py                    # [Mục 14, 15] Mã nguồn Python cốt lõi cài đặt N-gram LM từ đầu (MLE & Laplace)
+├── experiments.ipynb              # [Mục 13-24] Notebook Jupyter chạy thực nghiệm toàn diện trên 10.000 documents
+├── results.csv                    # [Mục 27] Bảng số liệu định lượng chuẩn hóa: thống kê corpus, PPL, predictions, rankings
 ├── error_analysis.md              # [Mục 22] Báo cáo mổ xẻ nguyên nhân 2 ca dự đoán đúng và 2 ca dự đoán sai
-├── reflection.md                  # [Mục 24, 26] Trả lời 7 câu hỏi phản tư & bộ câu hỏi vấn đáp nhanh 3 phút
-├── ngram_distribution.png         # [Mục 13] Biểu đồ phân phối log-log Zipf của Unigram/Bigram/Trigram
-├── run_experiments.py             # Script tự động hóa toàn bộ thực nghiệm và xuất file kết quả
-└── build_notebook.py              # Script biên soạn và thực thi notebook Jupyter chuẩn xác
+├── reflection.md                  # [Mục 24, 26, 30] Trả lời 7 câu hỏi phản tư & bộ câu hỏi vấn đáp nhanh 3 phút
+└── 23000111-VuTienDat-lab02.pdf # Toàn bộ phần tự luận file .md 
 ```
 
 ### Ý nghĩa của từng Deliverable:
 - **[calculations.md](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/calculations.md)**: Chứa lời giải toán giải tích từng bước cho các bài tập tính Unigram, Bigram, xác suất câu ($P(S_1) = P(S_2) = \frac{1}{24}$), tính đơn điệu không tăng của chuỗi, cơ chế chiết khấu của làm mịn Laplace và phân tích độ nhạy của Perplexity.
 - **[prediction.md](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/prediction.md)**: Ghi lại 5 giả thuyết nghiên cứu độc lập trước khi chạy code (Tính bất biến của từ vựng, sự bùng nổ của n-gram, nguy cơ zero probability, perplexity tập train, và so sánh Trigram vs Bigram trên dữ liệu nhỏ).
-- **[ngram_lm.py](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/ngram_lm.py)**: Module Python độc lập định nghĩa lớp `NGramLanguageModel` hỗ trợ đầy đủ các bậc $n$, kỹ thuật làm mịn MLE và Laplace/Add-k, tính toán log-probability, đo perplexity, dự đoán từ và xếp hạng câu.
+- **[ngram_lm.py](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/ngram_lm.py)**: Module Python độc lập định nghĩa lớp `NGramLanguageModel` hỗ trợ đầy đủ các bậc $n$, kỹ thuật làm mịn MLE và Laplace, tính toán log-probability, đo perplexity, dự đoán từ và xếp hạng câu.
 - **[experiments.ipynb](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/experiments.ipynb)**: Notebook thực nghiệm đã thực thi đầy đủ kết quả, biểu đồ trực quan và lời diễn giải.
-- **[results.csv](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/results.csv)**: Tập tin lưu kết quả định lượng tổng hợp gồm 4 phần dữ liệu đo đạc thực tế.
-- **[error_analysis.md](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/error_analysis.md)**: Mổ xẻ nguyên nhân thành công và thất bại trên 8 trục chẩn đoán.
-- **[reflection.md](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/reflection.md)**: Trả lời sâu sắc 7 câu hỏi phản tư và chuẩn bị sẵn sàng cho phần vấn đáp đánh giá cá nhân.
+- **[23000111_VuTienDat_BT2.ipynb](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/23000111_VuTienDat_BT2.ipynb)**: Bản nộp chính thức theo định dạng `<MSSV>_<FullName>_BT2.ipynb`.
+- **[results.csv](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/results.csv)**: Tập tin lưu kết quả định lượng tổng hợp gồm đầy đủ các metrics đo đạc từ Mục 13 đến Mục 22.
+- **[error_analysis.md](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/error_analysis.md)**: Mổ xẻ nguyên nhân thành công và thất bại trên 8 trục chẩn đoán (được phân mục 22.1, 22.2, 22.3).
+- **[reflection.md](file:///home/vutienndat2302/Documents/natural_language_processing/practice/lab02/reflection.md)**: Trả lời sâu sắc 7 câu hỏi phản tư (Mục 24), 5 câu hỏi nhanh (Mục 26) và liên kết liên khóa (Mục 30).
 
 ---
 
@@ -50,47 +48,49 @@ source .venv/bin/activate
 cd practice/lab02
 ```
 
-### Chạy toàn bộ thực nghiệm và xuất kết quả
-Để tái lập toàn bộ quy trình tính toán, huấn luyện mô hình và xuất file `results.csv`, `ngram_distribution.png`:
+### Chạy Notebook Thực Nghiệm
+Mở và chạy toàn bộ các ô trong notebook bằng Jupyter Notebook / VSCode hoặc biên dịch dòng lệnh:
 ```bash
-python3 run_experiments.py
-```
-
-### Biên dịch và chạy Notebook Jupyter
-Để tái tạo lại các cell code và xuất file `.ipynb` có sẵn output:
-```bash
-python3 build_notebook.py
 jupyter nbconvert --to notebook --execute experiments.ipynb --output experiments.ipynb
-cp experiments.ipynb 23000111_VuTienDat_BT2.ipynb
 ```
 
 ---
 
 ## 4. Tóm Tắt Kết Quả Thực Nghiệm Nổi Bật
 
-### 4.1. Thống kê Ngữ Liệu (Mẫu 10.000 Documents)
+### 4.1. Thống kê Ngữ Liệu (Mẫu 10.000 Documents trực tiếp từ 30K.json)
 | Chỉ số thống kê | Giá trị đo được | Ý nghĩa ngôn ngữ học |
 | :--- | :---: | :--- |
 | **Tổng số documents** | 10.000 | Bài viết diễn đàn công nghệ, đánh giá sản phẩm, tin tức |
-| **Tổng số câu** | 214.026 | Tách câu theo dấu câu kết thúc (`.`, `!`, `?`, xuống dòng) |
-| **Tổng số từ (Word Tokens)** | 3.657.680 | Đã chuẩn hóa chữ thường và lọc ký tự đặc biệt |
-| **Kích thước từ vựng $|\mathcal{V}|$** | 96.111 | Số lượng từ đơn khác nhau (unique word types) |
-| **Unique Bigrams** | 1.159.102 | **$73.12\%$** là *hapax legomena* (chỉ xuất hiện đúng 1 lần) |
-| **Unique Trigrams** | 2.361.677 | **$88.14\%$** là *hapax legomena* (chỉ xuất hiện đúng 1 lần) |
+| **Tổng số câu** | 208.462 | Tách câu theo regex `[.!?…]` kết hợp ngắt dòng |
+| **Tổng số từ (Word Tokens)** | 3.660.013 | Tokenizer cải tiến bảo toàn contractions (`don't`), từ có dấu (`café`) |
+| **Kích thước từ vựng $|\mathcal{V}|$** | 99.650 | Số lượng từ đơn phân biệt (unique word types) |
+| **Unique Bigrams** | 1.177.336 | **$73.34\%$** là *hapax legomena* (chỉ xuất hiện đúng 1 lần) |
+| **Unique Trigrams** | 2.391.301 | **$88.26\%$** là *hapax legomena* (chỉ xuất hiện đúng 1 lần) |
 
-![Biểu đồ phân phối Zipf](ngram_distribution.png)
+#### Bảng Phân Phối Tần Số Xuất Hiện (Frequency Distribution by Count Buckets - Mục 13.4):
+| Nhóm tần số (Count Bucket) | Unigram (# / %) | Bigram (# / %) | Trigram (# / %) |
+| :--- | :---: | :---: | :---: |
+| **$c = 1$ (Hapax Legomena)** | 45.578 (**45.74%**) | 863.471 (**73.34%**) | 2.110.601 (**88.26%**) |
+| **$c = 2$** | 13.608 (13.66%) | 138.514 (11.77%) | 163.534 (6.84%) |
+| **$c = 3 - 5$** | 14.718 (14.77%) | 101.278 (8.60%) | 81.986 (3.43%) |
+| **$c = 6 - 10$** | 8.159 (8.19%) | 37.719 (3.20%) | 21.684 (0.91%) |
+| **$c > 10$** | 17.587 (17.65%) | 36.354 (3.09%) | 13.496 (0.56%) |
+
+![Phân phối tần số theo nhóm mức đếm](ngram_freq_distribution.png)
+![Top 10 N-grams phổ biến nhất](top_ngrams_distribution.png)
+![Biểu đồ phân phối Zipf Toàn Bộ Rank](ngram_distribution.png)
 
 ### 4.2. So Sánh Perplexity Giữa Các Bậc N-Gram (Mục 16 & 19)
-Đánh giá trên tập Train (20.000 câu), Validation (2.500 câu), và Test (2.500 câu):
+Đánh giá trên tập Train (5.000 câu), Validation (2.500 câu), và Test (2.500 câu):
 
 | Mô hình & Phương pháp | Train PPL | Validation PPL | Test PPL | Nhận xét & Bản chất thống kê |
 | :--- | :---: | :---: | :---: | :--- |
-| **Unigram MLE** | 1.430,19 | **$\infty$** | **$\infty$** | Bị lỗi zero prob khi gặp từ OOV |
-| **Unigram Laplace** | 1.449,12 | 1.575,07 | 1.571,29 | Đường chuẩn baseline ổn định; không xét ngữ cảnh |
-| **Bigram MLE** | 55,74 | **$\infty$** | **$\infty$** | Ghi nhớ tốt train set; sụp đổ trên dữ liệu mới |
-| **Bigram Laplace** | 4.951,97 | 7.484,29 | 7.501,88 | Tránh được $\infty$, đo đạc được độ bối rối thực tế |
-| **Trigram MLE** | **4,44** | **$\infty$** | **$\infty$** | Gần như học vẹt (overfitting); sụp đổ trên test set |
-| **Trigram Laplace** | 10.733,27 | 19.899,09 | 19.719,13 | Bị phạt nặng bởi $|\mathcal{V}|=96.111$ do dữ liệu quá thưa |
+| **Bigram MLE** | 118,96 | **$\infty$** | **$\infty$** | Ghi nhớ tốt train set; sụp đổ trên dữ liệu mới do zero prob |
+| **Bigram Laplace** | 2.917,64 | 3.566,02 | 3.508,26 | Tránh được $\infty$, đo đạc được độ bối rối thực tế |
+| **Trigram MLE** | **9,82** | **$\infty$** | **$\infty$** | Gần như học vẹt (overfitting); sụp đổ trên test set |
+| **Trigram Laplace** | 11.080,03 | 19.338,36 | 19.407,58 | Bị phạt nặng bởi $|\mathcal{V}|=89.475$ do dữ liệu quá thưa |
+| **Unigram Laplace** | 1.418,87 | 1.172,87 | 1.184,93 | Đường chuẩn baseline ổn định; không xét ngữ cảnh |
 
 ### 4.3. Ứng dụng Dự đoán từ kế tiếp (Mục 20)
 - Ngữ cảnh `"in the"` $\to$ Top 3 dự đoán: `"most"` (0.0041), `"first"` (0.0039), `"best"` (0.0034) (Thực tế trong corpus: *"world"* 339 lần, *"past"* 224 lần).

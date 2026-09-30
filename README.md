@@ -29,4 +29,5 @@
 
 | Week | Theory Topics | Practical / Lab | Status |
 | :---: | :--- | :--- | :---: |
-| **01** | **Introduction to NLP**; Sparse & Dense Vector Representations; Count Vector Normalization; TF-IDF; Document Processing Pipeline; Demo on the 30K-Document Corpus | [**Lab 01 – From Text Processing to Search**](./practice/lab01/) | 🟡 In Progress |
+| **01** | **Introduction to NLP**; Sparse & Dense Vector Representations; Count Vector Normalization; TF-IDF; Document Processing Pipeline; Demo on the 30K-Document Corpus | [**Lab 01 – From Text Processing to Search**](./practice/lab01/) | 🟢 Completed |
+| **02** | **N-gram Language Models**; Maximum Likelihood Estimation (MLE); Laplace Smoothing; Perplexity Evaluation; Next-Word Prediction & Sentence Ranking | [**Lab 02 – Language Models**](./practice/lab02/) | 🟢 Completed |

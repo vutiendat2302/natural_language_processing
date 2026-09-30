@@ -1,38 +1,32 @@
-# PART 1: CORPUS STATISTICS
-Metric,Value
-Total Documents,10000
-Total Sentences,214026
-Total Word Tokens,3657680
-Vocabulary Size |V|,96111
-Unique Unigrams,96111
-Hapax Unigrams (count=1),43124
-Hapax Unigram Ratio (%),44.87%
-Unique Bigrams,1159102
-Hapax Bigrams (count=1),847576
-Hapax Bigram Ratio (%),73.12%
-Unique Trigrams,2361677
-Hapax Trigrams (count=1),2081496
-Hapax Trigram Ratio (%),88.14%
-
-# PART 2: PERPLEXITY EVALUATION ACROSS N-GRAM MODELS
-Model,Train PPL,Validation PPL,Test PPL,Fit Time (s)
-Unigram MLE,1430.19,inf,inf,0.32
-Unigram Laplace,1449.12,1575.07,1571.29,0.43
-Bigram MLE,55.74,inf,inf,0.5
-Bigram Laplace,4951.97,7484.29,7501.88,0.62
-Trigram MLE,4.44,inf,inf,0.56
-Trigram Laplace,10733.27,19899.09,19719.13,0.69
-
-# PART 3: NEXT-WORD PREDICTION BENCHMARK
-Context,Predictions (Top 3 with P),Actual In-Corpus Continuations
-in the,"most (0.0041), first (0.0039), best (0.0034)","world (339), past (224)"
-you can,"be (0.0085), t (0.0025), also (0.0017)","also (225), t (182)"
-the cat,"house (0.0002), </s> (0.0001), to (0.0001)","queen (5), s (2)"
-machine learning,"</s> (0.0002), in (0.0002), about (0.0002)","and (7), based (5)"
-natural language,"and (0.0003), </s> (0.0002), that (0.0001)","processing (2), toolkit (1)"
-
-# PART 4: SENTENCE RANKING CANDIDATE CONTINUATIONS
-Rank,Context,Candidate Continuation,Conditional Log Probability
-1,machine learning,banana computer quickly,-30.95
-2,machine learning,studies language models,-30.95
-3,machine learning,is useful for nlp,-39.03
+Section,Experiment,Model,Smoothing,Metric,Value,Note
+Mục 13,Corpus Statistics,Full Corpus,None,Total Documents,10000,Tập ngữ liệu 10.000 docs trích xuất từ 30K.json
+Mục 13,Corpus Statistics,Full Corpus,None,Total Sentences,208462,Số câu tách theo regex chuẩn
+Mục 13,Corpus Statistics,Full Corpus,None,Total Word Tokens,3660013,Tổng số từ vựng tokenized
+Mục 13,Corpus Statistics,Unigram,None,Unique Unigrams,99650,Kích thước từ vựng độc nhất
+Mục 13,Corpus Statistics,Bigram,None,Unique Bigrams,1177336,Số cụm bigram phân biệt
+Mục 13,Corpus Statistics,Trigram,None,Unique Trigrams,2391301,Số cụm trigram phân biệt
+Mục 13,Corpus Statistics,Trigram,None,Trigram Hapax Rate,88.26%,Tỷ lệ cụm xuất hiện đúng 1 lần
+Mục 15,Log Probability,Unigram,MLE,Naive Underflow Count on Longest Sentences,10,10/10 câu dài bị underflow về 0.0 trong linear space
+Mục 16,Exp 2: Smoothing,Bigram,MLE,Train PPL,118.96,Độ phức cảm trên tập huấn luyện
+Mục 16,Exp 2: Smoothing,Bigram,MLE,Valid PPL,inf (∞),Bị sụp đổ về inf do Zero probability
+Mục 16,Exp 2: Smoothing,Bigram,MLE,Test PPL,inf (∞),Bị sụp đổ về inf do Zero probability
+Mục 16,Exp 2: Smoothing,Bigram,Laplace,Train PPL,2917.64,Tăng do chiết khấu xác suất
+Mục 16,Exp 2: Smoothing,Bigram,Laplace,Valid PPL,3566.02,Tránh được inf
+Mục 16,Exp 2: Smoothing,Bigram,Laplace,Test PPL,3508.26,Tránh được inf
+Mục 16,Exp 2: Smoothing,Trigram,MLE,Train PPL,9.82,Rất thấp do ghi nhớ train set
+Mục 16,Exp 2: Smoothing,Trigram,MLE,Valid PPL,inf (∞),Bị sụp đổ về inf do Zero probability
+Mục 16,Exp 2: Smoothing,Trigram,MLE,Test PPL,inf (∞),Bị sụp đổ về inf do Zero probability
+Mục 16,Exp 2: Smoothing,Trigram,Laplace,Train PPL,11080.03,Bị chiết khấu xác suất
+Mục 16,Exp 2: Smoothing,Trigram,Laplace,Valid PPL,19338.36,Cao do phạt bởi |V| khi context thưa
+Mục 16,Exp 2: Smoothing,Trigram,Laplace,Test PPL,19407.58,Cao do phạt bởi |V| khi context thưa
+Mục 19,Exp 3: Perplexity,Unigram,Laplace,Train PPL,1418.87,Độ phức cảm Unigram Train
+Mục 19,Exp 3: Perplexity,Unigram,Laplace,Valid PPL,1172.87,Độ phức cảm Unigram Validation
+Mục 19,Exp 3: Perplexity,Unigram,Laplace,Test PPL,1184.93,Độ phức cảm Unigram Test
+Mục 20,Next-word Prediction,Trigram Fallback,MLE,Top-1 Accuracy,9.9000%,Tỷ lệ dự đoán chính xác từ vị trí số 1
+Mục 20,Next-word Prediction,Trigram Fallback,MLE,Top-5 Accuracy,21.1500%,Tỷ lệ từ mục tiêu nằm trong top 5 ứng viên
+Mục 20,Next-word Prediction,Trigram Fallback,MLE,Fallback to Bigram Rate,31.5500%,Tỷ lệ phải lùi bậc do context chưa thấy
+Mục 20,Next-word Prediction,Trigram Fallback,MLE,Actual is OOV Rate,5.0000%,Tỷ lệ từ thực tế ngoài từ vựng
+Mục 21,Sentence Ranking,Bigram,Laplace,Natural vs Scrambled Accuracy,96.8000%,Khả năng phân biệt câu tự nhiên vs xáo trộn
+Mục 21,Sentence Ranking,Trigram,Laplace,Natural vs Scrambled Accuracy,91.6000%,Khả năng phân biệt câu tự nhiên vs xáo trộn
+Mục 22,Error Analysis,Trigram Fallback,MLE,Unseen Context Error Rate,41.12%,Nguyên nhân lỗi do ngữ cảnh chưa từng xuất hiện
+Mục 22,Error Analysis,Trigram Fallback,MLE,OOV Error Rate,5.55%,Nguyên nhân lỗi do từ mục tiêu ngoài từ vựng

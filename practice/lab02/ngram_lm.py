@@ -1,12 +1,12 @@
-"""N-Gram Language Models from Scratch.
+"""Mô hình ngôn ngữ N-gram từ đầu (N-Gram Language Models from Scratch).
 
-This module implements Unigram, Bigram, and Trigram language models with
-Maximum Likelihood Estimation (MLE) and Add-k (Laplace) smoothing, as well as
-log-probability evaluation, perplexity measurement, next-word prediction,
-and sentence candidate ranking.
+Cài đặt các mô hình Unigram, Bigram, Trigram theo:
+- Maximum Likelihood Estimation (MLE)
+- Laplace (Add-1) Smoothing
+Hỗ trợ tính toán xác suất chuỗi, log-probability, Perplexity (PPL),
+đánh giá mô hình (evaluate), sinh từ tiếp theo (next-word prediction)
+và xếp hạng câu ứng viên (sentence ranking).
 
-Author: Vu Tien Dat (MSSV: 23000111)
-Course: MAT3561 - Natural Language Processing and Applications
 """
 
 from collections import Counter, defaultdict
@@ -14,155 +14,145 @@ import math
 import re
 from typing import Dict, List, Optional, Sequence, Tuple, Union
 
-
-def tokenize(text: str, lowercase: bool = True) -> List[str]:
-    """Tokenize a string into a list of word tokens.
-
-    Args:
-        text: Input raw string.
-        lowercase: Whether to convert text to lowercase.
-
-    Returns:
-        List of alphanumeric word tokens.
-    """
-    if lowercase:
-        text = text.lower()
-    return re.findall(r"\b[a-zA-Z0-9_]+\b", text)
+# Biểu thức chính quy tách câu và tách từ chuẩn
+SENT_SPLIT_REGEX = re.compile(r"(?<=[.!?…])\s+|\n+")
+TOKEN_REGEX = re.compile(r"[a-z0-9]+(?:'[a-z]+)?")
 
 
-def build_vocabulary(
-    tokenized_sentences: Sequence[Sequence[str]],
-    min_freq: int = 1,
-    max_vocab_size: Optional[int] = None,
-    unk_token: str = "<unk>",
-) -> Dict[str, int]:
-    """Extract vocabulary and frequency counts from tokenized sentences.
-
-    Args:
-        tokenized_sentences: Sequence of token lists.
-        min_freq: Minimum frequency threshold to retain a word.
-        max_vocab_size: Maximum vocabulary capacity (ranked by frequency).
-        unk_token: Special out-of-vocabulary representation token.
-
-    Returns:
-        Mapping from word token to its corpus frequency count.
-    """
-    counter: Counter = Counter()
-    for sentence in tokenized_sentences:
-        counter.update(sentence)
-
-    # Filter by minimum frequency
-    filtered = {w: c for w, c in counter.items() if c >= min_freq}
-
-    if max_vocab_size is not None and len(filtered) > max_vocab_size:
-        sorted_words = sorted(
-            filtered.items(), key=lambda item: item[1], reverse=True
-        )
-        filtered = dict(sorted_words[:max_vocab_size])
-
-    if unk_token not in filtered:
-        filtered[unk_token] = 0
-
-    return filtered
+def split_sentences(text: str) -> List[str]:
+    """Tách văn bản thô thành danh sách các câu dựa trên dấu kết thúc câu hoặc dấu xuống dòng."""
+    return [s.strip() for s in SENT_SPLIT_REGEX.split(text) if s.strip()]
 
 
-def count_ngrams(
-    tokenized_sentences: Sequence[Sequence[str]],
-    n: int,
-    use_boundary: bool = True,
-    start_token: str = "<s>",
-    end_token: str = "</s>",
-) -> Tuple[Counter, Counter]:
-    """Count n-grams and their conditioning (n-1)-gram contexts.
-
-    Args:
-        tokenized_sentences: Tokenized sentences.
-        n: N-gram order (1 for unigram, 2 for bigram, 3 for trigram).
-        use_boundary: Whether to append/prepend boundary markers.
-        start_token: Boundary prefix token.
-        end_token: Boundary suffix token.
-
-    Returns:
-        Tuple of (ngram_counts, context_counts).
-    """
-    ngram_counts: Counter = Counter()
-    context_counts: Counter = Counter()
-
-    for sent in tokenized_sentences:
-        if not sent:
-            continue
-        if n == 1:
-            tokens = list(sent) + ([end_token] if use_boundary else [])
-            for token in tokens:
-                ngram_counts[(token,)] += 1
-                context_counts[()] += 1
-        else:
-            padding = [start_token] * (n - 1) if use_boundary else []
-            tokens = padding + list(sent) + ([end_token] if use_boundary else [])
-            for i in range(len(tokens) - n + 1):
-                ngram = tuple(tokens[i : i + n])
-                context = tuple(tokens[i : i + n - 1])
-                ngram_counts[ngram] += 1
-                context_counts[context] += 1
-
-    return ngram_counts, context_counts
+def tokenize(text: str) -> List[str]:
+    """Tách từ theo chữ thường, giữ lại số và các từ có dấu nháy đơn tiếng Anh (ví dụ: don't)."""
+    return TOKEN_REGEX.findall(text.lower())
 
 
 class NGramLanguageModel:
-    """N-Gram Language Model with MLE and Laplace/Add-k Smoothing."""
+    """Mô hình ngôn ngữ N-gram với MLE hoặc Laplace Smoothing."""
 
     def __init__(
         self,
-        n: int = 2,
-        smoothing: Optional[str] = None,
-        k: float = 1.0,
-        use_boundary: bool = True,
-        unk_token: str = "<unk>",
-        start_token: str = "<s>",
-        end_token: str = "</s>",
+        n: int = 1,
+        min_count: int = 1,
+        smoothing: str = "mle",
     ):
-        """Initialize the N-gram Language Model.
+        """Khởi tạo mô hình N-gram.
 
         Args:
-            n: Order of the model (1=Unigram, 2=Bigram, 3=Trigram, ...).
-            smoothing: Smoothing method. Supported: None (MLE), 'laplace', 'add-k'.
-            k: Smoothing pseudo-count parameter (k=1.0 for standard Laplace).
-            use_boundary: Whether to include <s> and </s> tokens.
-            unk_token: Out-of-vocabulary representation token.
-            start_token: Start-of-sentence marker.
-            end_token: End-of-sentence marker.
+            n: Bậc của mô hình (1: Unigram, 2: Bigram, 3: Trigram, ...).
+            min_count: Ngưỡng tần số tối thiểu; từ xuất hiện ít hơn ngưỡng này sẽ thành <unk>.
+            smoothing: Phương pháp làm mịn ('mle' hoặc 'laplace').
         """
         if n < 1:
-            raise ValueError(f"Order n must be >= 1, got {n}")
-        self.n = n
-        self.smoothing = smoothing.lower() if smoothing else None
-        self.k = float(k)
-        self.use_boundary = use_boundary
-        self.unk_token = unk_token
-        self.start_token = start_token
-        self.end_token = end_token
+            raise ValueError(f"Bậc n phải >= 1, nhận được: {n}")
+        if min_count < 1:
+            raise ValueError(f"min_count phải >= 1, nhận được: {min_count}")
 
+        self.n: int = n
+        self.min_count: int = min_count
+        self.smoothing: str = smoothing.lower()
+        if self.smoothing not in ("mle", "laplace"):
+            raise ValueError(
+                f"smoothing phải là 'mle' hoặc 'laplace', nhận được: {smoothing}"
+            )
+
+        # Các ký hiệu đặc biệt
+        self.start_token: str = "<s>"
+        self.end_token: str = "</s>"
+        self.unk_token: str = "<unk>"
+
+        # Cấu trúc lưu trữ dữ liệu huấn luyện
         self.vocab: set = set()
         self.ngram_counts: Counter = Counter()
         self.context_counts: Counter = Counter()
+        self.continuations: Dict[Tuple[str, ...], Counter] = defaultdict(Counter)
         self.total_tokens: int = 0
         self.is_fitted: bool = False
 
-    def fit(
-        self,
-        corpus: Sequence[Union[str, Sequence[str]]],
-        vocab: Optional[set] = None,
+    @property
+    def vocab_size(self) -> int:
+        """Kích thước tập từ vựng V (bao gồm </s> và <unk> nếu có, không gồm <s>)."""
+        return len(self.vocab)
+
+    def build_vocabulary(
+        self, corpus: Sequence[Sequence[str]]
     ) -> "NGramLanguageModel":
-        """Train n-gram counts and vocabulary on the input corpus.
+        """Xây dựng tập từ vựng từ corpus huấn luyện.
 
-        Args:
-            corpus: Collection of sentences, either raw strings or lists of tokens.
-            vocab: Optional predefined vocabulary set.
-
-        Returns:
-            Self (fitted model).
+        Các từ có tần số < min_count được gom vào <unk>.
+        Quy ước: </s> luôn thuộc từ vựng; <s> không thuộc từ vựng;
+        <unk> thuộc từ vựng nếu có từ bị lọc hoặc min_count > 1.
         """
-        # Tokenize if needed
+        raw_counts: Counter = Counter()
+        for sent in corpus:
+            raw_counts.update(sent)
+
+        # Giữ lại các từ đạt ngưỡng tần số
+        self.vocab = {w for w, c in raw_counts.items() if c >= self.min_count}
+
+        # Bổ sung <unk> nếu có từ bị lọc hoặc min_count > 1
+        has_unk = (
+            any(c < self.min_count for c in raw_counts.values())
+            or self.min_count > 1
+        )
+        if has_unk:
+            self.vocab.add(self.unk_token)
+
+        # Token </s> luôn là một thành phần hợp lệ trong tập từ dự đoán
+        self.vocab.add(self.end_token)
+        return self
+
+    def _map_oov(self, sentence: Sequence[str]) -> List[str]:
+        """Ánh xạ các từ không nằm trong tập từ vựng (OOV) thành <unk>."""
+        return [w if w in self.vocab else self.unk_token for w in sentence]
+
+    def count_ngrams(
+        self, corpus: Sequence[Sequence[str]]
+    ) -> "NGramLanguageModel":
+        """Đếm số lần xuất hiện của các N-gram và ngữ cảnh (context) tương ứng."""
+        self.ngram_counts = Counter()
+        self.context_counts = Counter()
+        self.continuations = defaultdict(Counter)
+        self.total_tokens = 0
+
+        for sent in corpus:
+            tokens = self._map_oov(sent)
+            if not tokens:
+                continue
+
+            if self.n == 1:
+                # Unigram: xét từng token kèm </s>, context là tuple rỗng ()
+                tokens_with_end = tokens + [self.end_token]
+                for token in tokens_with_end:
+                    self.ngram_counts[(token,)] += 1
+                    self.context_counts[()] += 1
+                    self.continuations[()][token] += 1
+                    self.total_tokens += 1
+            else:
+                # N >= 2: thêm (n - 1) <s> ở đầu và 1 </s> ở cuối
+                padded = (
+                    [self.start_token] * (self.n - 1)
+                    + tokens
+                    + [self.end_token]
+                )
+                for i in range(len(padded) - self.n + 1):
+                    window = padded[i : i + self.n]
+                    ngram = tuple(window)
+                    context = tuple(window[:-1])
+                    word = window[-1]
+                    self.ngram_counts[ngram] += 1
+                    self.context_counts[context] += 1
+                    self.continuations[context][word] += 1
+                    self.total_tokens += 1
+
+        return self
+
+    def fit(
+        self, corpus: Sequence[Union[str, Sequence[str]]]
+    ) -> "NGramLanguageModel":
+        """Huấn luyện mô hình N-gram: xây dựng vocab và đếm n-gram counts."""
         tokenized_corpus: List[List[str]] = []
         for doc in corpus:
             if isinstance(doc, str):
@@ -172,58 +162,15 @@ class NGramLanguageModel:
             if tokens:
                 tokenized_corpus.append(tokens)
 
-        # Build vocabulary
-        if vocab is not None:
-            self.vocab = set(vocab)
-        else:
-            token_counts: Counter = Counter()
-            for sent in tokenized_corpus:
-                token_counts.update(sent)
-            self.vocab = set(token_counts.keys())
-
-        if self.use_boundary:
-            self.vocab.add(self.end_token)
-            if self.n > 1:
-                self.vocab.add(self.start_token)
-        self.vocab.add(self.unk_token)
-
-        # Replace unknown tokens
-        sanitized_corpus: List[List[str]] = []
-        for sent in tokenized_corpus:
-            sanitized = [w if w in self.vocab else self.unk_token for w in sent]
-            sanitized_corpus.append(sanitized)
-
-        # Count n-grams and unigrams
-        self.unigram_counts: Counter = Counter()
-        for sent in sanitized_corpus:
-            for token in sent:
-                self.unigram_counts[token] += 1
-            if self.use_boundary:
-                self.unigram_counts[self.end_token] += 1
-
-        self.ngram_counts, self.context_counts = count_ngrams(
-            sanitized_corpus,
-            self.n,
-            use_boundary=self.use_boundary,
-            start_token=self.start_token,
-            end_token=self.end_token,
-        )
-        if self.use_boundary:
-            self.total_tokens = sum(len(s) + 1 for s in sanitized_corpus)
-        else:
-            self.total_tokens = sum(len(s) for s in sanitized_corpus)
+        self.build_vocabulary(tokenized_corpus)
+        self.count_ngrams(tokenized_corpus)
         self.is_fitted = True
         return self
-
-    @property
-    def vocab_size(self) -> int:
-        """Return effective vocabulary size |V|."""
-        return len(self.vocab)
 
     def _normalize_context(
         self, context: Union[str, Sequence[str]]
     ) -> Tuple[str, ...]:
-        """Convert input context to a normalized tuple of length up to n-1."""
+        """Chuẩn hóa ngữ cảnh: lấy n-1 từ cuối, pad <s> nếu thiếu, map OOV sang <unk>."""
         if self.n == 1:
             return ()
 
@@ -232,288 +179,395 @@ class NGramLanguageModel:
         else:
             tokens = list(context)
 
-        # Sanitize known tokens
-        sanitized = [w if w in self.vocab else self.unk_token for w in tokens]
+        req_len = self.n - 1
+        if len(tokens) < req_len:
+            tokens = [self.start_token] * (req_len - len(tokens)) + tokens
+        else:
+            tokens = tokens[-req_len:]
 
-        # Truncate or pad
-        required_len = self.n - 1
-        if len(sanitized) < required_len:
-            if self.use_boundary:
-                padding = [self.start_token] * (required_len - len(sanitized))
-                return tuple(padding + sanitized)
+        # Ánh xạ OOV cho ngữ cảnh (giữ nguyên token <s>)
+        normalized = []
+        for t in tokens:
+            if t == self.start_token:
+                normalized.append(self.start_token)
+            elif t in self.vocab:
+                normalized.append(t)
             else:
-                return tuple(sanitized)
-        return tuple(sanitized[-required_len:])
+                normalized.append(self.unk_token)
+        return tuple(normalized)
+
+    def _prob_from_counts(self, ngram_count: int, context_count: int) -> float:
+        """Tính xác suất từ số đếm n-gram và số đếm context theo MLE hoặc Laplace."""
+        if self.smoothing == "laplace":
+            # Laplace: (C(h,w) + 1) / (C(h) + V)
+            # Đối với context chưa thấy (context_count = 0), trả về 1 / V
+            return (ngram_count + 1) / (context_count + self.vocab_size)
+
+        # Mặc định: MLE
+        if context_count == 0 or ngram_count == 0:
+            return 0.0
+        return ngram_count / context_count
 
     def probability(
         self, context: Union[str, Sequence[str]], word: str
     ) -> float:
-        """Compute conditional probability P(word | context).
+        """Tính xác suất có điều kiện P(word | context).
 
-        Args:
-            context: History tokens or string prefix.
-            word: Target continuation word.
-
-        Returns:
-            Probability value in [0.0, 1.0].
+        Chỉ dùng n-1 từ cuối của context; nếu ngắn hơn thì pad <s> bên trái.
+        Context hoặc word ngoài vocab được ánh xạ sang <unk>.
         """
-        if not self.is_fitted:
-            raise RuntimeError(
-                "Model must be fitted with .fit() before computing probability."
-            )
-
-        target_word = word if word in self.vocab else self.unk_token
+        target_word = (
+            word
+            if (word in self.vocab or word == self.end_token)
+            else self.unk_token
+        )
         ctx = self._normalize_context(context)
 
-        if self.n == 1 or len(ctx) == 0:
-            count_w = self.unigram_counts[target_word]
-            total_n = self.total_tokens
+        if self.n == 1:
+            c_ngram = self.ngram_counts.get((target_word,), 0)
+            c_ctx = self.context_counts.get((), 0)
+            return self._prob_from_counts(c_ngram, c_ctx)
 
-            if self.smoothing in ("laplace", "add-k"):
-                return (count_w + self.k) / (total_n + self.k * self.vocab_size)
-            return count_w / total_n if total_n > 0 else 0.0
-
-        target_ngram = ctx + (target_word,)
-        count_cw = self.ngram_counts[target_ngram]
-        count_c = self.context_counts[ctx]
-
-        if self.smoothing in ("laplace", "add-k"):
-            return (count_cw + self.k) / (count_c + self.k * self.vocab_size)
-
-        # Standard MLE
-        return count_cw / count_c if count_c > 0 else 0.0
+        c_ngram = self.ngram_counts.get(ctx + (target_word,), 0)
+        c_ctx = self.context_counts.get(ctx, 0)
+        return self._prob_from_counts(c_ngram, c_ctx)
 
     def log_probability(
         self, context: Union[str, Sequence[str]], word: str
     ) -> float:
-        """Compute natural log-probability ln P(word | context)."""
-        prob = self.probability(context, word)
-        if prob <= 0.0:
-            return -float("inf")
-        return math.log(prob)
+        """Tính log-xác suất tự nhiên ln P(word | context).
 
-    def sentence_probability(
-        self, sentence: Union[str, Sequence[str]], add_boundary: Optional[bool] = None
-    ) -> float:
-        """Compute the joint probability of a sentence using the chain rule.
-
-        P(S) = prod P(w_t | context_t)
+        Quy ước: Trả về float('-inf') khi xác suất p <= 0.0.
         """
-        log_prob = self.sentence_log_probability(
-            sentence, add_boundary=add_boundary
-        )
-        if math.isinf(log_prob) and log_prob < 0:
-            return 0.0
-        return math.exp(log_prob)
+        p = self.probability(context, word)
+        if p <= 0.0:
+            return float("-inf")
+        return math.log(p)
 
     def sentence_log_probability(
-        self, sentence: Union[str, Sequence[str]], add_boundary: Optional[bool] = None
+        self, sentence: Union[str, Sequence[str]]
     ) -> float:
-        """Compute the log-probability of a sentence to avoid numerical underflow.
+        """Tính log-xác suất của cả câu: ln P(S) = sum ln P(w_t | context_t).
 
-        ln P(S) = sum ln P(w_t | context_t)
+        Tự động thêm padding và ánh xạ OOV.
+        Nếu gặp bất kỳ vị trí nào có xác suất 0.0, trả về ngay float('-inf').
         """
-        if not self.is_fitted:
-            raise RuntimeError("Model must be fitted before scoring sentences.")
-
         if isinstance(sentence, str):
             tokens = tokenize(sentence)
         else:
             tokens = list(sentence)
 
         if not tokens:
-            return -float("inf")
+            return float("-inf")
 
-        if add_boundary is None:
-            add_boundary = self.use_boundary
+        mapped_tokens = self._map_oov(tokens)
 
-        sanitized = [w if w in self.vocab else self.unk_token for w in tokens]
-        if add_boundary:
-            tokens_to_eval = sanitized + [self.end_token]
-        else:
-            tokens_to_eval = sanitized
+        if self.n == 1:
+            tokens_to_score = mapped_tokens + [self.end_token]
+            total_lp = 0.0
+            for t in tokens_to_score:
+                lp = self.log_probability((), t)
+                if math.isinf(lp) and lp < 0:
+                    return float("-inf")
+                total_lp += lp
+            return total_lp
 
-        total_log_prob = 0.0
-        if self.use_boundary and self.n > 1:
-            history: List[str] = [self.start_token] * (self.n - 1)
-        else:
-            history = []
-
-        for token in tokens_to_eval:
-            lp = self.log_probability(history, token)
+        padded = (
+            [self.start_token] * (self.n - 1)
+            + mapped_tokens
+            + [self.end_token]
+        )
+        total_lp = 0.0
+        for i in range(len(padded) - self.n + 1):
+            ctx = tuple(padded[i : i + self.n - 1])
+            w = padded[i + self.n - 1]
+            lp = self.log_probability(ctx, w)
             if math.isinf(lp) and lp < 0:
-                return -float("inf")
-            total_log_prob += lp
-            history.append(token)
-            if len(history) > (self.n - 1):
-                history = history[-(self.n - 1) :]
+                return float("-inf")
+            total_lp += lp
+        return total_lp
 
-        return total_log_prob
+    def sentence_probability(self, sentence: Union[str, Sequence[str]]) -> float:
+        """Tính xác suất P(S) của cả câu bằng tích xác suất chuỗi.
 
-    def perplexity(
-        self,
-        sentences: Sequence[Union[str, Sequence[str]]],
-        add_boundary: bool = True,
-    ) -> float:
-        """Compute perplexity over a test corpus.
-
-        PP(W) = exp(- 1/N * sum ln P(w_i | context_i))
-
-        Returns float('inf') if any transition has zero probability.
+        Quy ước: math.exp(sentence_log_probability(sentence)).
+        Nếu sentence_log_probability là -inf, trả về đúng 0.0.
         """
-        if not self.is_fitted:
-            raise RuntimeError(
-                "Model must be fitted before computing perplexity."
-            )
-
-        total_log_prob = 0.0
-        total_tokens = 0
-
-        for sent in sentences:
-            if isinstance(sent, str):
-                tokens = tokenize(sent)
-            else:
-                tokens = list(sent)
-            if not tokens:
-                continue
-
-            num_tokens = len(tokens) + (1 if add_boundary else 0)
-            log_p = self.sentence_log_probability(sent, add_boundary=add_boundary)
-
-            if math.isinf(log_p) and log_p < 0:
-                return float("inf")
-
-            total_log_prob += log_p
-            total_tokens += num_tokens
-
-        if total_tokens == 0:
-            return float("inf")
-
-        cross_entropy = -total_log_prob / total_tokens
-        try:
-            return math.exp(cross_entropy)
-        except OverflowError:
-            return float("inf")
+        lp = self.sentence_log_probability(sentence)
+        if math.isinf(lp) and lp < 0:
+            return 0.0
+        return math.exp(lp)
 
     def next_word_distribution(
-        self, context: Union[str, Sequence[str]]
-    ) -> Dict[str, float]:
-        """Compute the full next-word conditional probability distribution over V."""
-        dist = {}
-        for word in self.vocab:
-            if word == self.start_token:
-                continue
-            dist[word] = self.probability(context, word)
+        self, context: Union[str, Sequence[str]], top_k: Optional[int] = None
+    ) -> List[Tuple[str, float]]:
+        """Trả về phân phối xác suất các từ tiếp theo dựa trên context đã cho.
+
+        Quy ước:
+        - Sắp xếp giảm dần theo xác suất; tie-break: sắp xếp theo thứ tự bảng chữ cái nếu cùng xác suất.
+        - Với MLE: context chưa từng thấy trong train thì trả về danh sách rỗng [].
+        - Với Laplace: trả phân phối trên TOÀN BỘ vocab (mọi từ đều có xác suất > 0).
+        - Nếu có top_k, chỉ trả về top_k phần tử đầu tiên.
+        """
+        ctx = self._normalize_context(context)
+
+        if self.smoothing == "laplace":
+            c_ctx = (
+                self.context_counts.get(ctx, 0)
+                if self.n > 1
+                else self.context_counts.get((), 0)
+            )
+            seen_counts = self.continuations.get(ctx, {})
+
+            dist = []
+            for w in self.vocab:
+                cnt = seen_counts.get(w, 0)
+                prob = (cnt + 1) / (c_ctx + self.vocab_size)
+                dist.append((w, prob))
+
+            dist.sort(key=lambda item: (-item[1], item[0]))
+            if top_k is not None:
+                return dist[:top_k]
+            return dist
+
+        # Mô hình MLE
+        if ctx not in self.continuations:
+            return []
+
+        c_ctx = self.context_counts[ctx]
+        if c_ctx == 0:
+            return []
+
+        words_dict = self.continuations[ctx]
+        dist = [
+            (w, self._prob_from_counts(cnt, c_ctx))
+            for w, cnt in words_dict.items()
+        ]
+        dist.sort(key=lambda item: (-item[1], item[0]))
+        if top_k is not None:
+            return dist[:top_k]
         return dist
 
-    def predict_next_words(
-        self, context: Union[str, Sequence[str]], top_k: int = 5
-    ) -> List[Tuple[str, float]]:
-        """Predict the top-k most likely words to follow the given context."""
-        dist = self.next_word_distribution(context)
-        # Exclude special boundary tokens from candidate generation
-        filtered = {
-            w: p
-            for w, p in dist.items()
-            if w not in (self.start_token, self.unk_token)
-        }
-        sorted_candidates = sorted(
-            filtered.items(), key=lambda item: item[1], reverse=True
-        )
-        return sorted_candidates[:top_k]
 
-    def score_continuation(
-        self,
-        context: Union[str, Sequence[str]],
-        continuation: Union[str, Sequence[str]],
-    ) -> float:
-        """Compute conditional log probability ln P(continuation | context)."""
-        if isinstance(context, str):
-            ctx_tokens = tokenize(context)
-        else:
-            ctx_tokens = list(context)
-
-        if isinstance(continuation, str):
-            cont_tokens = tokenize(continuation)
-        else:
-            cont_tokens = list(continuation)
-
-        history = list(ctx_tokens)
-        total_log_prob = 0.0
-
-        for token in cont_tokens:
-            lp = self.log_probability(history, token)
-            if math.isinf(lp) and lp < 0:
-                return -float("inf")
-            total_log_prob += lp
-            history.append(token)
-
-        return total_log_prob
-
-    def rank_sentences(
-        self,
-        context: Union[str, Sequence[str]],
-        candidates: Sequence[Union[str, Sequence[str]]],
-    ) -> List[Tuple[int, Union[str, Sequence[str]], float]]:
-        """Rank candidate continuations given a prefix context based on log probability."""
-        scored = []
-        for idx, cand in enumerate(candidates):
-            score = self.score_continuation(context, cand)
-            scored.append((idx, cand, score))
-        scored.sort(key=lambda item: item[2], reverse=True)
-        return scored
-
-
-# Functional API requested in Section 14
+# Các hàm tiện ích cấp module (Module-level helper functions)
 def train_unigram(
     corpus: Sequence[Union[str, Sequence[str]]],
-    smoothing: Optional[str] = None,
-    k: float = 1.0,
+    min_count: int = 1,
+    smoothing: str = "mle",
 ) -> NGramLanguageModel:
-    """Train a Unigram language model."""
-    model = NGramLanguageModel(n=1, smoothing=smoothing, k=k)
-    model.fit(corpus)
-    return model
+    """Huấn luyện mô hình Unigram (n=1) với phương pháp smoothing chỉ định."""
+    return NGramLanguageModel(
+        n=1, min_count=min_count, smoothing=smoothing
+    ).fit(corpus)
 
 
 def train_bigram(
     corpus: Sequence[Union[str, Sequence[str]]],
-    smoothing: Optional[str] = None,
-    k: float = 1.0,
+    min_count: int = 1,
+    smoothing: str = "mle",
 ) -> NGramLanguageModel:
-    """Train a Bigram language model."""
-    model = NGramLanguageModel(n=2, smoothing=smoothing, k=k)
-    model.fit(corpus)
-    return model
+    """Huấn luyện mô hình Bigram (n=2) với phương pháp smoothing chỉ định."""
+    return NGramLanguageModel(
+        n=2, min_count=min_count, smoothing=smoothing
+    ).fit(corpus)
 
 
 def train_trigram(
     corpus: Sequence[Union[str, Sequence[str]]],
-    smoothing: Optional[str] = None,
-    k: float = 1.0,
+    min_count: int = 1,
+    smoothing: str = "mle",
 ) -> NGramLanguageModel:
-    """Train a Trigram language model."""
-    model = NGramLanguageModel(n=3, smoothing=smoothing, k=k)
-    model.fit(corpus)
-    return model
+    """Huấn luyện mô hình Trigram (n=3) với phương pháp smoothing chỉ định."""
+    return NGramLanguageModel(
+        n=3, min_count=min_count, smoothing=smoothing
+    ).fit(corpus)
 
 
-def probability(
-    model: NGramLanguageModel, context: Union[str, Sequence[str]], word: str
-) -> float:
-    """Functional wrapper for probability calculation."""
-    return model.probability(context, word)
+def perplexity_from_probs(probs: Sequence[float]) -> float:
+    """Tính chỉ số Perplexity từ danh sách xác suất của chuỗi tokens: PPL = exp(- 1/N * sum ln p_i).
+
+    Nếu danh sách rỗng hoặc có ít nhất một xác suất <= 0.0, trả về float('inf').
+    """
+    if not probs:
+        return float("inf")
+    total_log_prob = 0.0
+    for p in probs:
+        if p <= 0.0:
+            return float("inf")
+        total_log_prob += math.log(p)
+    avg_log_prob = total_log_prob / len(probs)
+    return math.exp(-avg_log_prob)
 
 
-def sentence_probability(
-    model: NGramLanguageModel, sentence: Union[str, Sequence[str]]
-) -> float:
-    """Functional wrapper for sentence probability calculation."""
-    return model.sentence_probability(sentence)
+def evaluate(
+    model: NGramLanguageModel, sentences: Sequence[Union[str, Sequence[str]]]
+) -> Dict[str, Union[float, int]]:
+    """Đánh giá toàn diện mô hình trên tập câu: Perplexity, zero_rate, avg_logprob.
+
+    Returns:
+        Dict gồm:
+        - 'ppl': Perplexity chuẩn (trả float('inf') nếu có n-gram gặp xác suất 0.0).
+        - 'N': Tổng số vị trí token được đánh giá (bao gồm </s>, không bao gồm <s>).
+        - 'avg_logprob': Log-xác suất trung bình mỗi token (float('-inf') nếu có zero).
+        - 'n_zero': Tổng số vị trí có xác suất bằng 0.0.
+        - 'zero_rate': Tỷ lệ n_zero / N.
+        - 'ppl_excluding_zeros': Perplexity tính trên tập các token có p > 0.
+          Lưu ý: ppl_excluding_zeros là trường phụ, KHÔNG so sánh được giữa các mô hình khác nhau
+          vì tập token được đưa vào đánh giá đã bị lọc khác nhau.
+    """
+    N = 0
+    n_zero = 0
+    sum_nonzero_logprob = 0.0
+
+    for sent in sentences:
+        if isinstance(sent, str):
+            tokens = tokenize(sent)
+        else:
+            tokens = list(sent)
+        if not tokens:
+            continue
+
+        mapped_tokens = model._map_oov(tokens)
+
+        if model.n == 1:
+            tokens_to_score = mapped_tokens + [model.end_token]
+            for t in tokens_to_score:
+                N += 1
+                p = model.probability((), t)
+                if p <= 0.0:
+                    n_zero += 1
+                else:
+                    sum_nonzero_logprob += math.log(p)
+        else:
+            padded = (
+                [model.start_token] * (model.n - 1)
+                + mapped_tokens
+                + [model.end_token]
+            )
+            for i in range(len(padded) - model.n + 1):
+                N += 1
+                ctx = tuple(padded[i : i + model.n - 1])
+                w = padded[i + model.n - 1]
+                p = model.probability(ctx, w)
+                if p <= 0.0:
+                    n_zero += 1
+                else:
+                    sum_nonzero_logprob += math.log(p)
+
+    zero_rate = n_zero / N if N > 0 else 0.0
+    if n_zero > 0:
+        ppl = float("inf")
+        avg_logprob = float("-inf")
+    else:
+        avg_logprob = sum_nonzero_logprob / N if N > 0 else 0.0
+        ppl = math.exp(-avg_logprob) if N > 0 else float("inf")
+
+    nonzero_count = N - n_zero
+    if nonzero_count > 0:
+        ppl_excluding_zeros = math.exp(-(sum_nonzero_logprob / nonzero_count))
+    else:
+        ppl_excluding_zeros = float("inf")
+
+    return {
+        "ppl": ppl,
+        "N": N,
+        "avg_logprob": avg_logprob,
+        "n_zero": n_zero,
+        "zero_rate": zero_rate,
+        "ppl_excluding_zeros": ppl_excluding_zeros,
+    }
 
 
-def sentence_log_probability(
-    model: NGramLanguageModel, sentence: Union[str, Sequence[str]]
-) -> float:
-    """Functional wrapper for sentence log-probability calculation."""
-    return model.sentence_log_probability(sentence)
+def score_continuation(
+    model: NGramLanguageModel,
+    context_tokens: Union[str, Sequence[str]],
+    candidate_tokens: Union[str, Sequence[str]],
+    add_eos: bool = True,
+) -> Tuple[float, float, int]:
+    """Tính log P(candidate | context) và log-prob chuẩn hóa theo số token.
+
+    Args:
+        model: Mô hình ngôn ngữ N-gram đã fit.
+        context_tokens: Ngữ cảnh ban đầu (chuỗi hoặc danh sách token).
+        candidate_tokens: Đoạn tiếp nối cần chấm điểm.
+        add_eos: Có tính thêm xác suất chuyển sang </s> ở cuối hay không.
+
+    Returns:
+        Tuple: (total_log_prob, avg_log_prob, num_tokens_scored)
+        Nếu gặp xác suất 0.0, total_log_prob và avg_log_prob là -inf.
+    """
+    if isinstance(context_tokens, str):
+        ctx_list = tokenize(context_tokens)
+    else:
+        ctx_list = list(context_tokens)
+
+    if isinstance(candidate_tokens, str):
+        cand_list = tokenize(candidate_tokens)
+    else:
+        cand_list = list(candidate_tokens)
+
+    # Lịch sử gồm ngữ cảnh ban đầu
+    history = list(ctx_list)
+    tokens_to_score = list(cand_list)
+    if add_eos:
+        tokens_to_score.append(model.end_token)
+
+    total_lp = 0.0
+    num_tokens = len(tokens_to_score)
+    if num_tokens == 0:
+        return 0.0, 0.0, 0
+
+    for token in tokens_to_score:
+        lp = model.log_probability(history, token)
+        if math.isinf(lp) and lp < 0:
+            return float("-inf"), float("-inf"), num_tokens
+        total_lp += lp
+        history.append(token)
+
+    avg_lp = total_lp / num_tokens
+    return total_lp, avg_lp, num_tokens
+
+
+def rank_candidates(
+    model: NGramLanguageModel,
+    context: Union[str, Sequence[str]],
+    candidates: Sequence[Union[str, Sequence[str]]],
+    add_eos: bool = True,
+) -> List[Dict[str, Union[str, float, int]]]:
+    """Xếp hạng các câu ứng viên candidate dựa trên log-prob và avg-log-prob.
+
+    Các candidate bằng nhau xếp đồng hạng, tie-break theo thứ tự bảng chữ cái.
+    """
+    results = []
+    for cand in candidates:
+        cand_str = cand if isinstance(cand, str) else " ".join(cand)
+        tot_lp, avg_lp, n_tok = score_continuation(
+            model, context, cand, add_eos=add_eos
+        )
+        results.append({
+            "candidate": cand_str,
+            "log_prob": tot_lp,
+            "avg_log_prob": avg_lp,
+            "tokens": n_tok,
+        })
+
+    # Xếp hạng theo total log_prob (giảm dần, tie-break candidate chữ cái)
+    results.sort(key=lambda x: (-x["log_prob"], x["candidate"]))
+    cur_rank = 1
+    for i, r in enumerate(results):
+        if i > 0 and r["log_prob"] == results[i - 1]["log_prob"]:
+            r["rank_total"] = results[i - 1]["rank_total"]
+        else:
+            r["rank_total"] = i + 1
+
+    # Xếp hạng theo avg log_prob (giảm dần, tie-break candidate chữ cái)
+    results.sort(key=lambda x: (-x["avg_log_prob"], x["candidate"]))
+    for i, r in enumerate(results):
+        if i > 0 and r["avg_log_prob"] == results[i - 1]["avg_log_prob"]:
+            r["rank_avg"] = results[i - 1]["rank_avg"]
+        else:
+            r["rank_avg"] = i + 1
+
+    # Trả về sắp xếp theo rank_total làm chuẩn
+    results.sort(key=lambda x: (x["rank_total"], -x["avg_log_prob"], x["candidate"]))
+    return results
