@@ -1,0 +1,90 @@
+Section,Category,Model_or_Method,Configuration,Metric,Value,Unit,Scientific_Finding
+Mục 06,Theoretical Calculation,Co-occurrence Matrix,"k=1, 4 câu toy corpus","Cosine(cat, dog)",1.0000,"Score [-1,1]",Hai vector cat và dog trùng nhau vì có cùng ngữ cảnh
+Mục 06,Theoretical Calculation,Cosine,"x=[1,2,1], y=[2,4,2]","Cosine(x, y)",1.0000,"Score [-1,1]",y = 2x nên cùng hướng
+Mục 07,Semantic Comparison,Cosine,vector giả định của đề,"Cosine(doctor, physician)",0.9871,"Score [-1,1]",Hai vector gần như cùng hướng
+Mục 07,Semantic Comparison,Cosine,vector giả định của đề,"Cosine(doctor, banana)",-0.1414,"Score [-1,1]",Hai vector lệch hướng
+Mục 08,Representation Analysis,Sparse word-context,"V=10000, non-zero=30",Sparsity,99.70,%,Phần lớn phần tử bằng 0
+Mục 16,Training Pairs,CBOW,"the cat eats fish, k=1",Số training example,4,Instances,Mỗi vị trí tạo một mẫu context -> target
+Mục 16,Training Pairs,Skip-gram,"the cat eats fish, k=1",Số training pair,6,Pairs,"Mỗi cặp (target, context) là một mẫu"
+Mục 23,Analogy Calculation,Vector arithmetic,king-man+woman (vector giả định),Vector kết quả,"[8, 4, 7]",Coordinates,"Tính tay: [8, 4, 7]"
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=1,Sparsity,97.28,%,"non-zero=60, |V|=47"
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=1,Sim(doctor-physician),0.7071,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=1,Sim(doctor-hospital),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=1,Sim(doctor-patient),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=1,Sim(doctor-computer),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=1,Sim(doctor-banana),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=2,Sparsity,95.38,%,"non-zero=102, |V|=47"
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=2,Sim(doctor-physician),0.4082,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=2,Sim(doctor-hospital),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=2,Sim(doctor-patient),0.7071,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=2,Sim(doctor-computer),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=2,Sim(doctor-banana),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=5,Sparsity,90.09,%,"non-zero=219, |V|=47"
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=5,Sim(doctor-physician),0.3873,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=5,Sim(doctor-hospital),0.6325,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=5,Sim(doctor-patient),0.2631,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=5,Sim(doctor-computer),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 10,Exp 1: Co-occurrence,Co-occurrence Matrix,k=5,Sim(doctor-banana),0.0000,"Score [-1,1]",Toy corpus 11 câu
+Mục 17,Exp 2: Word2Vec,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Số câu,251373,Sentences,Trích từ 30K.json (12000 docs đầu)
+Mục 17,Exp 2: Word2Vec,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Số token,4332040,Tokens,
+Mục 17,Exp 2: Word2Vec,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Kích thước từ vựng,55227,Words,min_count=2
+Mục 17,Exp 2: Word2Vec,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Thời gian train,118.97,Seconds,Phụ thuộc máy chạy
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, physician)",0.6944,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, patient)",0.5782,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, hospital)",0.4962,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, disease)",0.3862,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, computer)",0.3334,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, football)",0.2628,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1","Sim(doctor, banana)",0.0267,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Top-1 gần doctor: dentist,0.7657,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Top-2 gần doctor: surgeon,0.7419,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Top-3 gần doctor: veterinarian,0.7315,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Top-4 gần doctor: ophthalmologist,0.6982,"Score [-1,1]",
+Mục 18,Inspect Embeddings,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Top-5 gần doctor: physician,0.6944,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=2, d=100, epochs=8",Sim(doctor - physician),0.7686,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=5, d=100, epochs=8",Sim(doctor - physician),0.7141,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=10, d=100, epochs=8",Sim(doctor - physician),0.7245,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=2, d=100, epochs=8",Sim(doctor - hospital),0.5936,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=5, d=100, epochs=8",Sim(doctor - hospital),0.5120,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=10, d=100, epochs=8",Sim(doctor - hospital),0.5924,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=2, d=100, epochs=8",Sim(doctor - patient),0.6425,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=5, d=100, epochs=8",Sim(doctor - patient),0.6051,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=10, d=100, epochs=8",Sim(doctor - patient),0.6235,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=2, d=100, epochs=8",Sim(cat - dog),0.6263,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=5, d=100, epochs=8",Sim(cat - dog),0.6255,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=10, d=100, epochs=8",Sim(cat - dog),0.5758,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=2, d=100, epochs=8",Sim(car - vehicle),0.7316,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=5, d=100, epochs=8",Sim(car - vehicle),0.7724,"Score [-1,1]",
+Mục 19,Exp 3: Context Window,Skip-gram,"window=10, d=100, epochs=8",Sim(car - vehicle),0.7656,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=50, window=5, epochs=8",Thời gian train,90.21,Seconds,Phụ thuộc máy chạy
+Mục 20,Exp 4: Dimension,Skip-gram,"d=50, window=5, epochs=8",Kích thước ma trận vector,10.53,MB,|V|*d*4 bytes
+Mục 20,Exp 4: Dimension,Skip-gram,"d=50, window=5, epochs=8","Sim(doctor, physician)",0.8203,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=50, window=5, epochs=8","Sim(doctor, hospital)",0.6139,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=50, window=5, epochs=8","Sim(car, vehicle)",0.8926,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=100, window=5, epochs=8",Thời gian train,91.46,Seconds,Phụ thuộc máy chạy
+Mục 20,Exp 4: Dimension,Skip-gram,"d=100, window=5, epochs=8",Kích thước ma trận vector,21.07,MB,|V|*d*4 bytes
+Mục 20,Exp 4: Dimension,Skip-gram,"d=100, window=5, epochs=8","Sim(doctor, physician)",0.7141,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=100, window=5, epochs=8","Sim(doctor, hospital)",0.5120,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=100, window=5, epochs=8","Sim(car, vehicle)",0.7724,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=300, window=5, epochs=8",Thời gian train,150.20,Seconds,Phụ thuộc máy chạy
+Mục 20,Exp 4: Dimension,Skip-gram,"d=300, window=5, epochs=8",Kích thước ma trận vector,63.20,MB,|V|*d*4 bytes
+Mục 20,Exp 4: Dimension,Skip-gram,"d=300, window=5, epochs=8","Sim(doctor, physician)",0.6117,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=300, window=5, epochs=8","Sim(doctor, hospital)",0.4617,"Score [-1,1]",
+Mục 20,Exp 4: Dimension,Skip-gram,"d=300, window=5, epochs=8","Sim(car, vehicle)",0.5931,"Score [-1,1]",
+Mục 21,Word Similarity,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Rank 1: car - automobile,0.7273,"Score [-1,1]",
+Mục 21,Word Similarity,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Rank 2: doctor - physician,0.6944,"Score [-1,1]",
+Mục 21,Word Similarity,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Rank 3: king - queen,0.6312,"Score [-1,1]",
+Mục 21,Word Similarity,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Rank 4: cat - dog,0.6172,"Score [-1,1]",
+Mục 21,Word Similarity,Skip-gram,"d=100, window=5, epochs=10, sg=1, workers=1",Rank 5: computer - banana,0.1170,"Score [-1,1]",
+Mục 22,Word Analogy,Vector arithmetic,king - man + woman,Top-1: queen,0.6579,"Score [-1,1]",
+Mục 22,Word Analogy,Vector arithmetic,king - man + woman,Top-2: cal,0.5401,"Score [-1,1]",
+Mục 22,Word Analogy,Vector arithmetic,king - man + woman,Top-3: headboard,0.4790,"Score [-1,1]",
+Mục 22,Word Analogy,Vector arithmetic,king - man + woman,Top-4: convoluted,0.4759,"Score [-1,1]",
+Mục 22,Word Analogy,Vector arithmetic,king - man + woman,Top-5: mattress,0.4702,"Score [-1,1]",
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 1,0.8829,Cosine,The patient received clinical therapy and intensive medical treatment.
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 2,0.7512,Cosine,The modern clinic provides high quality healthcare and disease treatment.
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 3,0.7087,Cosine,A qualified physician examined the sick person and prescribed appropriate therapy.
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 4,0.4737,Cosine,New computer software algorithms accelerate large scale data processing.
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 5,0.4678,Cosine,The automotive engineer inspected the electric car and its hybrid motor.
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 6,0.4553,Cosine,"A healthy diet includes fresh banana, citrus fruits, and nutritious food."
+Mục 24,Semantic Search,Mean-pooling embedding,query='medical treatment',Rank 7,0.3264,Cosine,Football players competed in an exciting tournament at the sports stadium.

@@ -31,3 +31,4 @@
 | :---: | :--- | :--- | :---: |
 | **01** | **Introduction to NLP**; Sparse & Dense Vector Representations; Count Vector Normalization; TF-IDF; Document Processing Pipeline; Demo on the 30K-Document Corpus | [**Lab 01 – From Text Processing to Search**](./practice/lab01/) | 🟢 Completed |
 | **02** | **N-gram Language Models**; Maximum Likelihood Estimation (MLE); Laplace Smoothing; Perplexity Evaluation; Next-Word Prediction & Sentence Ranking | [**Lab 02 – Language Models**](./practice/lab02/) | 🟢 Completed |
+| **03** | **Word Representations & Embeddings**; Distributional Hypothesis; Co-occurrence Matrix & Cosine Similarity; Word2Vec (CBOW & Skip-gram); Hyperparameter Tuning (Window Size & Dimension); Word Analogy & Semantic Search | [**Lab 03 – Word Representations and Embeddings**](./practice/lab03/) | 🟢 Completed |

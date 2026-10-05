@@ -1,69 +1,77 @@
-# Workspace Rules: MAT3561 - Natural Language Processing & Applications
+# Quy tắc Workspace: MAT3561 - Xử lý ngôn ngữ tự nhiên và ứng dụng
 
-This document defines repository guidelines, conventions, and operational rules for AI assistants working in this workspace.
-
----
-
-## 1. Project & Course Context
-- **Course**: MAT3561 - Natural Language Processing and Applications (Xử lý ngôn ngữ tự nhiên và ứng dụng)
-- **Lecturer (Theory)**: Dr. Le Hong Phuong (Room 105-T5) — [www.phuong.pro](http://www.phuong.pro)
-- **Instructor (Practice)**: M.Sc. Pham Ngoc Hai (Computer Lab PM)
-- **Student Profile**:
-  - Full Name: **Vũ Tiến Đạt**
-  - Student ID (MSSV): `23000111`
+Tài liệu này định nghĩa các quy tắc repository, quy ước và nguyên tắc vận hành dành cho AI assistant khi làm việc trong workspace này.
 
 ---
 
-## 2. Directory Structure Conventions
+## 1. Bối cảnh Project & Môn học
+
+* **Môn học**: MAT3561 - Natural Language Processing and Applications (Xử lý ngôn ngữ tự nhiên và ứng dụng)
+
+* **Giảng viên lý thuyết**: Dr. Le Hong Phuong (Phòng 105-T5) — [www.phuong.pro](http://www.phuong.pro)
+
+* **Giảng viên thực hành**: M.Sc. Pham Ngoc Hai (Phòng máy PM)
+
+* **Thông tin sinh viên**:
+
+  * Họ và tên: **Vũ Tiến Đạt**
+  * Mã sinh viên (MSSV): `23000111`
+
+---
+
+## 2. Quy ước cấu trúc thư mục
 
 ```text
 natural_language_processing/
-├── README.md                          # Main course dashboard & syllabus tracker
-├── requirements.txt                   # Project dependencies
-├── .gitignore                         # Git exclusion rules
-├── AGENTS.md                          # Persistent agent rules and guidelines
-├── .agent/skills/sync-readme/SKILL.md # Skill to sync syllabus with actual files
+
+├── README.md                          # Dashboard chính và bảng theo dõi syllabus
+├── requirements.txt                   # Các dependency của project
+├── .gitignore                         # Quy tắc loại trừ của Git
+├── AGENTS.md                          # Quy tắc và hướng dẫn dành cho AI assistant
+├── .agent/skills/sync-readme/SKILL.md # Skill đồng bộ syllabus với các file thực tế
 ├── theory/
-│   ├── ed3book_aug26.pdf              # Core textbook (Jurafsky & Martin)
-│   ├── hf_transformers_tutorial.pdf   # Transformers reference
-│   └── week<N>/                       # Theory slides, lecture notes, corpora
 └── practice/
-    └── lab<NN>/                       # e.g., lab01, lab02, ...
-        ├── W<N>.pdf                   # Lab assignment problem statement
-        ├── <MSSV>_<FullName>_BT<N>.ipynb  # Implementation notebook
-        └── calculations.md            # Detailed math solutions & derivations
+
 ```
 
 ---
 
-## 3. Naming & Coding Standards
+## 3. Quy ước đặt tên & Coding Standards
 
-### File Naming Conventions
-- **Practice Notebooks**: `<MSSV>_<FullNameWithoutAccent>_BT<N>.ipynb`
-  - Example: `23000111_VuTienDat_BT1.ipynb`
-- **Theory Directories**: `theory/week<N>` (e.g. `theory/week1`, `theory/week2`)
-- **Practice Directories**: `practice/lab<NN>` (e.g. `practice/lab01`, `practice/lab02`)
+### Quy ước đặt tên file
 
-### Python & Machine Learning Conventions
-- **Python Version**: `>= 3.10`
-- **Dependencies**: Rely on packages specified in `requirements.txt` (PyTorch, Transformers, NLTK, Spacy, Underthesea, PyVi, Scikit-learn).
-- **Reproducibility**: Always fix random seeds for deterministic results (`random.seed(42)`, `np.random.seed(42)`, `torch.manual_seed(42)`).
-- **Notebook Quality**:
-  - Use clear Markdown cells to explain formulas, intuition, and algorithm steps using LaTeX.
-  - Do not leave empty error tracebacks or unexecuted required cells.
-  - Format plots with proper titles, labels, and legends.
+* **Thư mục lý thuyết**: `theory/week<N>`
 
----
+  * Ví dụ: `theory/week1`, `theory/week2`
 
-## 4. Language & Communication Policy
+* **Thư mục thực hành**: `practice/lab<NN>`
 
-- **Chat & Discussions**: Respond to the user in **Vietnamese** (natural, concise, technical).
-- **Code, Comments & Documentation**: Write all code comments, docstrings, Markdown reports, and `README.md` content in **English** unless explicitly requested otherwise.
+  * Ví dụ: `practice/lab01`, `practice/lab02`
 
----
+### Quy ước Python & Machine Learning
 
-## 5. Git & Data Management Rules
+* **Phiên bản Python**: `>= 3.10`
 
-- **Never commit large binaries**: Model checkpoints (`*.pt`, `*.pth`, `*.bin`, `*.safetensors`), large datasets (`*.jsonl`, `*.parquet`), or embedding dumps (`glove*`, `word2vec*`).
-- Always respect [`.gitignore`](file:///home/datbritget/Documents/natural_language_processing/.gitignore).
-- When modifying `README.md`, only update the `Syllabus & Progress` table or specifically requested sections; do not wipe custom user content.
+* **Dependencies**: Sử dụng các package được khai báo trong `requirements.txt`, bao gồm:
+
+  * PyTorch
+  * Transformers
+  * NLTK
+  * Spacy
+  * Underthesea
+  * PyVi
+  * Scikit-learn
+
+* **Khả năng tái lập (Reproducibility)**:
+
+  * Luôn cố định random seed để đảm bảo kết quả có thể tái lập:
+
+    ```python
+    random.seed(42)
+    np.random.seed(42)
+    torch.manual_seed(42)
+    ```
+
+* **Chất lượng Notebook**:
+
+  * Sử dụng
