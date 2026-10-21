@@ -50,6 +50,7 @@ htmlcov/
 # --- NLP Datasets & Corpora ---
 # Ignore large dataset directories and raw data files
 data/
+data_splits/
 datasets/
 corpus/
 corpora/

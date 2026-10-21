@@ -1,0 +1,8 @@
+experiment,model,representation,sequence_length,parameters,training_time,accuracy,precision,recall,f1
+exp3_baseline,Logistic Regression,TF-IDF,Full Doc,20001,13.86,0.8998,0.894,0.908,0.9009
+exp4_arch_compare,Simple RNN,Embedding (128d),200,2593282,4.9,0.5793,0.5926,0.5072,0.5466
+exp4_arch_compare,LSTM,Embedding (128d),200,2692354,9.6,0.7686,0.7409,0.8262,0.7812
+exp4_arch_compare,GRU,Embedding (128d),200,2659330,6.88,0.8194,0.8803,0.7392,0.8036
+exp5_seq_length,LSTM,Embedding (128d),50,2692354,3.65,0.7145,0.7354,0.6702,0.7013
+exp5_seq_length,LSTM,Embedding (128d),100,2692354,5.9,0.7647,0.7751,0.7457,0.7601
+exp5_seq_length,LSTM,Embedding (128d),200,2692354,9.6,0.7686,0.7409,0.8262,0.7812
