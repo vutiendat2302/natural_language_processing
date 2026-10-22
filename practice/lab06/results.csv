@@ -1,0 +1,7 @@
+Experiment,Model,Accuracy,F1,Training_Time_s,Parameters,Notes
+Exp4_Model_Comparison,LSTM_Final_Hidden,0.8524,0.8512,48.6,78402,LAB 05 Baseline recurrent processing
+Exp4_Model_Comparison,Self_Attention_Context,0.8740,0.8735,24.3,65858,LAB 06 Direct token-to-token parallel attention
+Exp5_Cost_Scaling,Seq_10,NA,NA,NA,100,Matrix 10x10 (100 elements)
+Exp5_Cost_Scaling,Seq_100,NA,NA,NA,10000,Matrix 100x100 (10000 elements)
+Exp5_Cost_Scaling,Seq_500,NA,NA,NA,250000,Matrix 500x500 (250000 elements)
+Exp5_Cost_Scaling,Seq_1000,NA,NA,NA,1000000,Matrix 1000x1000 (1000000 elements)
