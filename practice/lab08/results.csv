@@ -1,0 +1,22 @@
+Experiment,Model_or_Condition,Encoder_Trainable,Train_Data_Pct,Max_Length,Parameters,Trainable_Params,Training_Time_s,Memory_GB,Accuracy,Precision,Recall,F1,Notes
+Exp1_Pretrained_vs_Scratch,Transformer_From_Scratch,Yes,100,128,198274,198274,23.2,0.42,0.8860,0.8888,0.8824,0.8856,Random init; learns representation and classifier jointly from IMDb only
+Exp1_Pretrained_vs_Scratch,Pretrained_BERT_FineTuned,Yes,100,128,66364418,66364418,142.5,2.68,0.9348,0.9331,0.9368,0.9349,Pretrained MLM representations + task fine-tuning (+4.88% Accuracy vs scratch)
+Exp2_Frozen_vs_FineTuning,ModeA_Frozen_Feature_Extraction,No,100,128,66364418,1538,38.4,0.95,0.8640,0.8665,0.8608,0.8636,Only linear head (1538 params) trained; encoder weights frozen
+Exp2_Frozen_vs_FineTuning,ModeB_Full_FineTuning,Yes,100,128,66364418,66364418,142.5,2.68,0.9348,0.9331,0.9368,0.9349,All encoder layers + head updated (+7.08% Accuracy vs frozen)
+Exp3_Data_Efficiency,Pretrained_BERT_10pct,Yes,10,128,66364418,66364418,16.8,2.68,0.8920,0.8905,0.8925,0.8915,10% data pretrained (89.20%) beats 100% data from-scratch (88.60%)
+Exp3_Data_Efficiency,Pretrained_BERT_25pct,Yes,25,128,66364418,66364418,38.2,2.68,0.9112,0.9104,0.9116,0.9110,Strong sample efficiency on small downstream subset
+Exp3_Data_Efficiency,Pretrained_BERT_50pct,Yes,50,128,66364418,66364418,73.6,2.68,0.9244,0.9236,0.9248,0.9242,Diminishing marginal error reduction as data scales
+Exp3_Data_Efficiency,Pretrained_BERT_100pct,Yes,100,128,66364418,66364418,142.5,2.68,0.9348,0.9331,0.9368,0.9349,Full training set; only 4.28% drop from 100% down to 10%
+Exp3_Data_Efficiency,Scratch_Transformer_10pct,Yes,10,128,198274,198274,3.1,0.42,0.6840,0.6895,0.6692,0.6792,Severe overfitting and poor lexical coverage at 10% data (-20.20% drop)
+Exp3_Data_Efficiency,Scratch_Transformer_25pct,Yes,25,128,198274,198274,6.4,0.42,0.7784,0.7812,0.7718,0.7765,Moderate performance; still lacks broad contextual priors
+Exp3_Data_Efficiency,Scratch_Transformer_50pct,Yes,50,128,198274,198274,12.1,0.42,0.8416,0.8435,0.8381,0.8408,Approaching baseline but inferior to 10% pretrained model
+Exp3_Data_Efficiency,Scratch_Transformer_100pct,Yes,100,128,198274,198274,23.2,0.42,0.8860,0.8888,0.8824,0.8856,Full training set baseline from LAB 07
+Exp4_Max_Seq_Length,Pretrained_BERT_Len64,Yes,100,64,66364418,66364418,74.2,1.45,0.8984,0.8998,0.8960,0.8979,Truncation loses late sentiment conclusions in long reviews
+Exp4_Max_Seq_Length,Pretrained_BERT_Len128,Yes,100,128,66364418,66364418,142.5,2.68,0.9348,0.9331,0.9368,0.9349,Optimal accuracy-vs-compute trade-off (O(T^2) = 16384/head)
+Exp4_Max_Seq_Length,Pretrained_BERT_Len256,Yes,100,256,66364418,66364418,318.6,5.84,0.9412,0.9401,0.9424,0.9413,+0.64% Accuracy gain but 2.24x training time and 2.18x memory due to O(T^2)
+Exp5_Domain_Shift,InDomain_DomainA_IMDb_Movies,Yes,100,128,66364418,66364418,142.5,2.68,0.9348,0.9331,0.9368,0.9349,Trained on Domain A (IMDb) and evaluated in-domain on Domain A
+Exp5_Domain_Shift,OutOfDomain_DomainB1_Electronics,Yes,100,128,66364418,66364418,0.0,2.68,0.8312,0.8450,0.8112,0.8278,Zero-shot transfer from IMDb to Electronics product reviews (-10.36% Acc)
+Exp5_Domain_Shift,OutOfDomain_DomainB2_FinancialNews,Yes,100,128,66364418,66364418,0.0,2.68,0.7460,0.7685,0.7040,0.7348,Zero-shot transfer from IMDb to Financial/Scientific news (-18.88% Acc)
+Exp6_Confidence_Buckets,High_Confidence_ge_0.85,Yes,100,128,66364418,66364418,0.0,2.68,0.9684,0.9675,0.9692,0.9683,1960/2500 samples (78.4%); 1898 correct and 62 overconfident errors
+Exp6_Confidence_Buckets,Medium_Confidence_0.65_to_0.85,Yes,100,128,66364418,66364418,0.0,2.68,0.8795,0.8780,0.8810,0.8795,365/2500 samples (14.6%); 321 correct and 44 errors
+Exp6_Confidence_Buckets,Low_Confidence_lt_0.65,Yes,100,128,66364418,66364418,0.0,2.68,0.6743,0.6710,0.6780,0.6745,175/2500 samples (7.0%); 118 correct and 57 ambiguous errors
